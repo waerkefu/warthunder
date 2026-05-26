@@ -63,6 +63,14 @@ public class user_model {
         return role == 0;
     }
 
+    public boolean isModerator() {
+        return role == 1;
+    }
+
+    public boolean isNormalUser() {
+        return role == 2;
+    }
+
     public String getAvatar() {
         return avatar;
     }

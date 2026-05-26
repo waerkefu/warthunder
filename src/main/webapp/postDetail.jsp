@@ -82,7 +82,8 @@
             color: #fff;
         }
 
-        .btn-reply {
+        .btn-reply,
+        .btn-delete {
             background-color: #252a32;
             color: #00e0d0;
             padding: 4px 10px;
@@ -90,7 +91,8 @@
             border: 1px solid #3a4252;
         }
 
-        .btn-reply:hover {
+        .btn-reply:hover,
+        .btn-delete:hover {
             background-color: #3a4252;
         }
 
@@ -158,6 +160,46 @@
 
         .post-image:hover {
             transform: scale(1.02);
+            cursor: pointer;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .lightbox-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 85%;
+            border-radius: 8px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .lightbox-close:hover,
+        .lightbox-close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .post-actions {
@@ -221,6 +263,25 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+        }
+
+        .comment-author-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00e0d0, #00c2b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            object-fit: cover;
+            flex-shrink: 0;
         }
 
         .comment-author {
@@ -408,7 +469,25 @@
         <div class="post-header">
             <h1 class="post-title"><%= post.getTitle() %></h1>
             <div class="post-meta">
-                <span>作者: <%= post.getUsername() %></span>
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    <% 
+                        user_model author = null;
+                        try {
+                            user_service us = new user_service();
+                            author = us.findUserByUsername(post.getUsername());
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    %>
+                    <span class="comment-avatar" style="width: 24px; height: 24px; font-size: 12px;">
+                        <% if (author != null && author.hasAvatar()) { %>
+                        <img src="<%= author.getAvatar() %>" class="comment-avatar" style="width: 24px; height: 24px;">
+                        <% } else { %>
+                        <%= post.getUsername() != null && !post.getUsername().isEmpty() ? post.getUsername().charAt(0) : "?" %>
+                        <% } %>
+                    </span>
+                    作者: <%= post.getUsername() %>
+                </span>
                 <span>发布时间: <%= post.getCreate_time() %></span>
             </div>
         </div>
@@ -417,14 +496,20 @@
         <% if (post.hasImages()) { %>
         <div class="post-images">
             <div class="images-grid">
-                <% if (post.getImage1() != null) { %><img src="<%= post.getImage1() %>" class="post-image" alt="图片1"><% } %>
-                <% if (post.getImage2() != null) { %><img src="<%= post.getImage2() %>" class="post-image" alt="图片2"><% } %>
-                <% if (post.getImage3() != null) { %><img src="<%= post.getImage3() %>" class="post-image" alt="图片3"><% } %>
-                <% if (post.getImage4() != null) { %><img src="<%= post.getImage4() %>" class="post-image" alt="图片4"><% } %>
-                <% if (post.getImage5() != null) { %><img src="<%= post.getImage5() %>" class="post-image" alt="图片5"><% } %>
+                <% if (post.getImage1() != null) { %><img src="<%= post.getImage1() %>" class="post-image" alt="图片1" onclick="openLightbox('<%= post.getImage1() %>')"><% } %>
+                <% if (post.getImage2() != null) { %><img src="<%= post.getImage2() %>" class="post-image" alt="图片2" onclick="openLightbox('<%= post.getImage2() %>')"><% } %>
+                <% if (post.getImage3() != null) { %><img src="<%= post.getImage3() %>" class="post-image" alt="图片3" onclick="openLightbox('<%= post.getImage3() %>')"><% } %>
+                <% if (post.getImage4() != null) { %><img src="<%= post.getImage4() %>" class="post-image" alt="图片4" onclick="openLightbox('<%= post.getImage4() %>')"><% } %>
+                <% if (post.getImage5() != null) { %><img src="<%= post.getImage5() %>" class="post-image" alt="图片5" onclick="openLightbox('<%= post.getImage5() %>')"><% } %>
+                <% if (post.getImage6() != null) { %><img src="<%= post.getImage6() %>" class="post-image" alt="图片6" onclick="openLightbox('<%= post.getImage6() %>')"><% } %>
             </div>
         </div>
         <% } %>
+        
+        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+            <span class="lightbox-close" onclick="closeLightbox()">×</span>
+            <img class="lightbox-content" id="lightbox-image">
+        </div>
         
         <%
             boolean isAdmin = false;
@@ -478,14 +563,23 @@
             %>
             <div class="comment-item" id="comment-<%= comment.getId() %>">
                 <div class="comment-header">
-                    <span class="comment-author" onclick="showReplyForm(<%= comment.getId() %>, '<%= comment.getUsername() %>')">@<%= comment.getUsername() %></span>
+                    <div class="comment-author-info">
+                        <span class="comment-avatar">
+                            <% if (comment.hasAvatar()) { %>
+                            <img src="<%= comment.getAvatar() %>" class="comment-avatar">
+                            <% } else { %>
+                            <%= comment.getUsername() != null && !comment.getUsername().isEmpty() ? comment.getUsername().charAt(0) : "?" %>
+                            <% } %>
+                        </span>
+                        <span class="comment-author" onclick="showReplyForm(<%= comment.getId() %>, '<%= comment.getUsername() %>')">@<%= comment.getUsername() %></span>
+                    </div>
                     <span class="comment-time"><%= comment.getCreate_time() %></span>
                 </div>
                 <div class="comment-content"><%= comment.getContent() %></div>
                 <div class="comment-actions">
                     <button class="btn btn-reply" onclick="showReplyForm(<%= comment.getId() %>, '<%= comment.getUsername() %>')">回复</button>
-                    <% if (isPostOwner || isAdmin) { %>
-                    <button class="btn btn-danger" style="font-size: 12px; padding: 4px 10px;" onclick="if(confirm('确定要删除这条评论吗？')) location.href='admin?action=deleteComment&commentId=<%= comment.getId() %>&postId=<%= post.getId() %>'">删除</button>
+                    <% if (isPostOwner || isAdmin || (loginUser != null && loginUser.equals(comment.getUsername()))) { %>
+                    <button class="btn btn-delete" onclick="if(confirm('确定要删除这条评论吗？')) location.href='deleteComment?commentId=<%= comment.getId() %>&postId=<%= post.getId() %>'">删除</button>
                     <% } %>
                 </div>
                 
@@ -503,8 +597,17 @@
                 <div class="reply-list">
                     <% for (CommentModel reply : replies) { %>
                     <div class="reply-item">
-                        <div class="reply-header">
-                            <span class="reply-author">@<%= reply.getUsername() %></span>
+                        <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #00e0d0, #00c2b3); display: flex; align-items: center; justify-content: center; font-size: 12px; object-fit: cover; flex-shrink: 0;">
+                                    <% if (reply.hasAvatar()) { %>
+                                    <img src="<%= reply.getAvatar() %>" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                    <% } else { %>
+                                    <%= reply.getUsername() != null && !reply.getUsername().isEmpty() ? reply.getUsername().charAt(0) : "?" %>
+                                    <% } %>
+                                </span>
+                                <span class="reply-author">@<%= reply.getUsername() %></span>
+                            </div>
                             <span class="reply-time"><%= reply.getCreate_time() %></span>
                         </div>
                         <% if (reply.hasParent() && reply.getParent_username() != null) { %>
@@ -515,8 +618,8 @@
                         <div class="reply-content"><%= reply.getContent() %></div>
                         <div style="margin-top: 8px;">
                             <button class="btn btn-reply" onclick="showReplyForm(<%= comment.getId() %>, '<%= reply.getUsername() %>')">回复</button>
-                            <% if (isPostOwner || isAdmin) { %>
-                            <button class="btn btn-danger" style="font-size: 12px; padding: 4px 10px;" onclick="if(confirm('确定要删除这条回复吗？')) location.href='admin?action=deleteComment&commentId=<%= reply.getId() %>&postId=<%= post.getId() %>'">删除</button>
+                            <% if (isPostOwner || isAdmin || (loginUser != null && loginUser.equals(reply.getUsername()))) { %>
+                            <button class="btn btn-delete" onclick="if(confirm('确定要删除这条回复吗？')) location.href='deleteComment?commentId=<%= reply.getId() %>&postId=<%= post.getId() %>'">删除</button>
                             <% } %>
                         </div>
                     </div>
@@ -553,6 +656,26 @@
         var textarea = form.querySelector('textarea');
         textarea.value = '';
     }
+
+    function openLightbox(imageUrl) {
+        var lightbox = document.getElementById('lightbox');
+        var lightboxImage = document.getElementById('lightbox-image');
+        lightboxImage.src = imageUrl;
+        lightbox.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        var lightbox = document.getElementById('lightbox');
+        lightbox.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeLightbox();
+        }
+    });
 </script>
 </body>
 </html>

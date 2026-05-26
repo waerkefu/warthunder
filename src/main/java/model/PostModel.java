@@ -13,6 +13,7 @@ public class PostModel {
     private String image3;
     private String image4;
     private String image5;
+    private String image6;
 
     public PostModel() {}
 
@@ -125,7 +126,15 @@ public class PostModel {
         this.image5 = image5;
     }
 
+    public String getImage6() {
+        return image6;
+    }
+
+    public void setImage6(String image6) {
+        this.image6 = image6;
+    }
+
     public boolean hasImages() {
-        return image1 != null || image2 != null || image3 != null || image4 != null || image5 != null;
+        return image1 != null || image2 != null || image3 != null || image4 != null || image5 != null || image6 != null;
     }
 }

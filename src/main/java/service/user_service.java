@@ -55,14 +55,19 @@ public class user_service {
         return userdao.insertPost(userId, title, content);
     }
 
-    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5) {
+    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5, String image6) {
         user_dao userdao = new user_dao();
-        return userdao.insertPostWithImages(userId, title, content, image1, image2, image3, image4, image5);
+        return userdao.insertPostWithImages(userId, title, content, image1, image2, image3, image4, image5, image6);
     }
 
     public int updatePost(int postId, String title, String content) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.updatePost(postId, title, content);
+    }
+
+    public int updatePostWithImages(int postId, String title, String content, String image1, String image2, String image3, String image4, String image5, String image6) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.updatePostWithImages(postId, title, content, image1, image2, image3, image4, image5, image6);
     }
 
     public int deletePost(int postId) {
@@ -118,6 +123,21 @@ public class user_service {
     public int changePassword(int userId, String newPassword) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.changePassword(userId, newPassword);
+    }
+
+    public ArrayList<user_model> findAllUsers() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findAllUsers();
+    }
+
+    public int deleteUser(int userId) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.deleteUser(userId);
+    }
+
+    public int updateUserRole(int userId, int role) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.updateUserRole(userId, role);
     }
 
     public ArrayList<ArticleModel> findArticlesByAuthor(String author) throws SQLException {

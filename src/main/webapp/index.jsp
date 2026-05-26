@@ -399,6 +399,88 @@
             font-size: 14px;
             text-align: center;
         }
+
+        .post-content-area {
+            grid-column: 1;
+        }
+
+        .post-preview {
+            color: #8892a5;
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .post-images-preview {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            max-width: 100%;
+        }
+
+        .preview-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .preview-image:hover {
+            transform: scale(1.05);
+        }
+
+        .post-meta-area {
+            grid-column: 2 / span 3;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post-meta-author {
+            color: #8892a5;
+            font-size: 14px;
+        }
+
+        .post-meta-replies {
+            color: #8892a5;
+            font-size: 14px;
+        }
+
+        .post-meta-time {
+            color: #8892a5;
+            font-size: 14px;
+        }
+
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -426,9 +508,20 @@
             <%
                 String loginUser = (String) session.getAttribute("loginUser");
                 if (loginUser != null && !loginUser.isEmpty()) {
+                    boolean isAdmin = false;
+                    try {
+                        user_service us = new user_service();
+                        user_model user = us.findUserByUsername(loginUser);
+                        isAdmin = user.isAdmin();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
             %>
             <span style="color: #00e0d0; margin-right: 12px;">欢迎, <%= loginUser %></span>
             <button class="btn-publish" onclick="togglePublishForm()">发布帖子</button>
+            <% if (isAdmin) { %>
+            <a href="adminUsers.jsp" class="btn-publish" style="background-color: #d9232e;">用户管理</a>
+            <% } %>
             <button class="btn-logout" onclick="location.href='Login.jsp'">退出登录</button>
             <%
             } else {
@@ -453,7 +546,7 @@
                 <textarea id="postContent" name="content" placeholder="请输入帖子内容" required></textarea>
             </div>
             <div class="form-group">
-                <label>上传图片（最多5张）</label>
+                <label>上传图片（最多6张）</label>
                 <div class="image-upload-container">
                     <label class="image-upload-box">
                         <input type="file" name="image1" accept="image/*" onchange="previewImage(this, 1)">
@@ -480,6 +573,11 @@
                         <div class="upload-icon">📷</div>
                         <span>选择图片5</span>
                     </label>
+                    <label class="image-upload-box">
+                        <input type="file" name="image6" accept="image/*" onchange="previewImage(this, 6)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片6</span>
+                    </label>
                 </div>
             </div>
             <div class="form-actions">
@@ -500,12 +598,14 @@
             </div>
             <%
                 boolean isAdmin = false;
+                boolean isModerator = false;
                 String loginUsername = (String) session.getAttribute("loginUser");
                 if (loginUsername != null) {
                     try {
                         user_service us = new user_service();
                         user_model user = us.findUserByUsername(loginUsername);
                         isAdmin = user.isAdmin();
+                        isModerator = user.isModerator();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -524,25 +624,39 @@
                         boolean isBanned = post.getStatus() == 0;
             %>
             <div class="post-item <%= isBanned ? "banned" : "" %>">
-                <% if (isAdmin) { %>
+                <% if (isAdmin || isModerator) { %>
                 <div class="admin-menu-container">
                     <button type="button" class="admin-menu-btn" data-menu-id="menu-<%= post.getId() %>">⋮</button>
                     <div class="admin-menu" id="menu-<%= post.getId() %>">
-                        <% if (isBanned) { %>
-                        <a href="javascript:void(0);" onclick="confirmAction('确定要解封这篇帖子吗？', 'admin?action=unban&postId=<%= post.getId() %>')">解封</a>
-                        <% } else { %>
-                        <a href="javascript:void(0);" onclick="confirmAction('确定要封禁这篇帖子吗？封禁后普通用户将无法看到', 'admin?action=ban&postId=<%= post.getId() %>')">封禁</a>
+                        <% if (isAdmin) { %>
+                            <% if (isBanned) { %>
+                            <a href="javascript:void(0);" onclick="confirmAction('确定要解封这篇帖子吗？', 'admin?action=unban&postId=<%= post.getId() %>')">解封</a>
+                            <% } else { %>
+                            <a href="javascript:void(0);" onclick="confirmAction('确定要封禁这篇帖子吗？封禁后普通用户将无法看到', 'admin?action=ban&postId=<%= post.getId() %>')">封禁</a>
+                            <% } %>
                         <% } %>
                         <a href="javascript:void(0);" onclick="confirmAction('确定要删除这篇帖子吗？此操作不可恢复', 'deletePost?articleId=<%= post.getId() %>')">删除</a>
                     </div>
                 </div>
                 <% } %>
-                <a href="postDetail?articleId=<%= post.getId() %>" class="post-title">
-                    <%= isBanned ? "[已封禁] " : "" %><%= post.getTitle() %>
-                </a>
-                <span class="post-meta"><%= post.getUsername() %></span>
-                <span class="post-meta">0</span>
-                <span class="post-meta"><%= post.getCreate_time() != null ? post.getCreate_time().substring(0, 10) : "" %></span>
+                <div class="post-content-area">
+                    <a href="postDetail?articleId=<%= post.getId() %>" class="post-title">
+                        <%= isBanned ? "[已封禁] " : "" %><%= post.getTitle() %>
+                    </a>
+                    <p class="post-preview"><%= post.getContent() != null && post.getContent().length() > 100 ? post.getContent().substring(0, 100) + "..." : (post.getContent() != null ? post.getContent() : "") %></p>
+                    <% if (post.getImage1() != null || post.getImage2() != null || post.getImage3() != null) { %>
+                    <div class="post-images-preview">
+                        <% if (post.getImage1() != null) { %><img src="<%= post.getImage1() %>" class="preview-image" alt="图片1" onclick="openLightbox('<%= post.getImage1() %>')"><% } %>
+                        <% if (post.getImage2() != null) { %><img src="<%= post.getImage2() %>" class="preview-image" alt="图片2" onclick="openLightbox('<%= post.getImage2() %>')"><% } %>
+                        <% if (post.getImage3() != null) { %><img src="<%= post.getImage3() %>" class="preview-image" alt="图片3" onclick="openLightbox('<%= post.getImage3() %>')"><% } %>
+                    </div>
+                    <% } %>
+                </div>
+                <div class="post-meta-area">
+                    <span class="post-meta-author"><%= post.getUsername() %></span>
+                    <span class="post-meta-replies">0 回复</span>
+                    <span class="post-meta-time"><%= post.getCreate_time() != null ? post.getCreate_time().substring(0, 10) : "" %></span>
+                </div>
             </div>
             <%
                     }
@@ -557,10 +671,26 @@
         </div>
     </div>
 </div>
+
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+        <img src="" id="lightboxContent" class="lightbox-content" onclick="event.stopPropagation()">
+    </div>
 <script>
     function togglePublishForm() {
         var form = document.getElementById('publishForm');
         form.classList.toggle('active');
+    }
+
+    function openLightbox(imageUrl) {
+        var overlay = document.getElementById('lightboxOverlay');
+        var content = document.getElementById('lightboxContent');
+        content.src = imageUrl;
+        overlay.classList.add('active');
+    }
+
+    function closeLightbox() {
+        var overlay = document.getElementById('lightboxOverlay');
+        overlay.classList.remove('active');
     }
 
     function confirmAction(message, url) {

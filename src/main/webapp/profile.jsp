@@ -139,6 +139,11 @@
             color: #fff;
         }
 
+        .role-moderator {
+            background-color: #2196f3;
+            color: #fff;
+        }
+
         .role-user {
             background-color: #3a4252;
             color: #00e0d0;
@@ -329,8 +334,8 @@
                 <%= user != null ? user.getEmail() : "" %>
             </div>
             <% if (user != null) { %>
-            <span class="role-badge <%= user.isAdmin() ? "role-admin" : "role-user" %>">
-                <%= user.isAdmin() ? "管理员" : "普通用户" %>
+            <span class="role-badge <%= user.isAdmin() ? "role-admin" : (user.isModerator() ? "role-moderator" : "role-user") %>">
+                <%= user.isAdmin() ? "管理员" : (user.isModerator() ? "小管理" : "普通用户") %>
             </span>
             <% } %>
         </div>

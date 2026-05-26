@@ -39,6 +39,7 @@ public class AdminController extends HttpServlet {
             String action = req.getParameter("action");
             String postId = req.getParameter("postId");
             String commentId = req.getParameter("commentId");
+            String userId = req.getParameter("userId");
 
             if ("ban".equals(action) && postId != null) {
                 int result = us.banPost(Integer.parseInt(postId));
@@ -63,6 +64,27 @@ public class AdminController extends HttpServlet {
                     } else {
                         out.println("<script>alert('评论已删除！');history.back();</script>");
                     }
+                } else {
+                    out.println("<script>alert('删除失败！');history.back();</script>");
+                }
+            } else if ("promote".equals(action) && userId != null) {
+                int result = us.updateUserRole(Integer.parseInt(userId), 1);
+                if (result > 0) {
+                    out.println("<script>alert('已设为小管理！');location.href='adminUsers.jsp';</script>");
+                } else {
+                    out.println("<script>alert('操作失败！');history.back();</script>");
+                }
+            } else if ("demote".equals(action) && userId != null) {
+                int result = us.updateUserRole(Integer.parseInt(userId), 2);
+                if (result > 0) {
+                    out.println("<script>alert('已撤销小管理权限！');location.href='adminUsers.jsp';</script>");
+                } else {
+                    out.println("<script>alert('操作失败！');history.back();</script>");
+                }
+            } else if ("deleteUser".equals(action) && userId != null) {
+                int result = us.deleteUser(Integer.parseInt(userId));
+                if (result > 0) {
+                    out.println("<script>alert('用户已删除！');location.href='adminUsers.jsp';</script>");
                 } else {
                     out.println("<script>alert('删除失败！');history.back();</script>");
                 }

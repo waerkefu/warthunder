@@ -56,7 +56,7 @@ public class PublishPostController extends HttpServlet {
             return;
         }
 
-        String image1 = null, image2 = null, image3 = null, image4 = null, image5 = null;
+        String image1 = null, image2 = null, image3 = null, image4 = null, image5 = null, image6 = null;
         
         try {
             String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
@@ -70,11 +70,12 @@ public class PublishPostController extends HttpServlet {
             image3 = uploadImage(req.getPart("image3"), uploadPath);
             image4 = uploadImage(req.getPart("image4"), uploadPath);
             image5 = uploadImage(req.getPart("image5"), uploadPath);
+            image6 = uploadImage(req.getPart("image6"), uploadPath);
 
             user_service us = new user_service();
             user_model user = us.findUserByUsername(loginUser);
 
-            int result = us.insertPostWithImages(user.getUser_id(), title.trim(), content.trim(), image1, image2, image3, image4, image5);
+            int result = us.insertPostWithImages(user.getUser_id(), title.trim(), content.trim(), image1, image2, image3, image4, image5, image6);
 
             if (result > 0) {
                 out.println("<script>alert('帖子发布成功！');location.href='index.jsp';</script>");

@@ -1,6 +1,7 @@
 package controller;
 
 import model.PostModel;
+import model.user_model;
 import service.user_service;
 
 import javax.servlet.ServletException;
@@ -29,7 +30,7 @@ public class DeletePostController extends HttpServlet {
 
         String articleId = req.getParameter("articleId");
         if (articleId == null || articleId.isEmpty()) {
-            out.println("<script>alert('参数错误！');location.href='profile';</script>");
+            out.println("<script>alert('参数错误！');location.href='index.jsp';</script>");
             return;
         }
 
@@ -38,25 +39,41 @@ public class DeletePostController extends HttpServlet {
             PostModel post = us.findPostById(Integer.parseInt(articleId));
 
             if (post == null || post.getId() == 0) {
-                out.println("<script>alert('帖子不存在！');location.href='profile';</script>");
+                out.println("<script>alert('帖子不存在！');location.href='index.jsp';</script>");
                 return;
             }
 
-            if (!post.getUsername().equals(loginUser)) {
-                out.println("<script>alert('您只能删除自己的帖子！');location.href='profile';</script>");
-                return;
+            user_model currentUser = us.findUserByUsername(loginUser);
+            user_model postAuthor = us.findUserByUsername(post.getUsername());
+
+            boolean isAdmin = currentUser.isAdmin();
+            boolean isModerator = currentUser.isModerator();
+            boolean isPostAuthorAdmin = postAuthor.isAdmin();
+            boolean isPostAuthorModerator = postAuthor.isModerator();
+            boolean isOwner = post.getUsername().equals(loginUser);
+
+            if (!isAdmin && !isOwner) {
+                if (isModerator) {
+                    if (isPostAuthorAdmin || isPostAuthorModerator) {
+                        out.println("<script>alert('小管理不能删除管理员或其他小管理的帖子！');location.href='index.jsp';</script>");
+                        return;
+                    }
+                } else {
+                    out.println("<script>alert('您只能删除自己的帖子！');location.href='index.jsp';</script>");
+                    return;
+                }
             }
 
             int result = us.deletePost(Integer.parseInt(articleId));
 
             if (result > 0) {
-                out.println("<script>alert('帖子删除成功！');location.href='profile';</script>");
+                out.println("<script>alert('帖子删除成功！');location.href='index.jsp';</script>");
             } else {
-                out.println("<script>alert('帖子删除失败！');location.href='profile';</script>");
+                out.println("<script>alert('帖子删除失败！');location.href='index.jsp';</script>");
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            out.println("<script>alert('数据库错误！');location.href='profile';</script>");
+            out.println("<script>alert('数据库错误！');location.href='index.jsp';</script>");
         }
     }
 }

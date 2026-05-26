@@ -9,6 +9,7 @@ public class CommentModel {
     private String create_time;
     private int parent_id;
     private String parent_username;
+    private String avatar;
 
     public CommentModel() {}
 
@@ -82,6 +83,18 @@ public class CommentModel {
 
     public void setParent_username(String parent_username) {
         this.parent_username = parent_username;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public boolean hasAvatar() {
+        return avatar != null && !avatar.isEmpty();
     }
 
     public boolean hasParent() {

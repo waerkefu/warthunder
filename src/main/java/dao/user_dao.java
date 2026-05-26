@@ -104,6 +104,9 @@ public class user_dao {
             post.setUsername(rs.getString("username"));
             post.setCreate_time(rs.getString("create_time"));
             post.setStatus(rs.getInt("status"));
+            post.setImage1(rs.getString("image1"));
+            post.setImage2(rs.getString("image2"));
+            post.setImage3(rs.getString("image3"));
             list.add(post);
         }
         db.close();
@@ -124,6 +127,9 @@ public class user_dao {
             post.setUsername(rs.getString("username"));
             post.setCreate_time(rs.getString("create_time"));
             post.setStatus(rs.getInt("status"));
+            post.setImage1(rs.getString("image1"));
+            post.setImage2(rs.getString("image2"));
+            post.setImage3(rs.getString("image3"));
             list.add(post);
         }
         db.close();
@@ -148,6 +154,7 @@ public class user_dao {
             post.setImage3(rs.getString("image3"));
             post.setImage4(rs.getString("image4"));
             post.setImage5(rs.getString("image5"));
+            post.setImage6(rs.getString("image6"));
         }
         db.close();
         return post;
@@ -161,10 +168,10 @@ public class user_dao {
         return i;
     }
 
-    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5) {
+    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5, String image6) {
         DBHelper db = new DBHelper();
-        String sql = "insert into post(title,content,user_id,image1,image2,image3,image4,image5) values(?,?,?,?,?,?,?,?)";
-        int i = db.executeUpdate(sql, title, content, userId, image1, image2, image3, image4, image5);
+        String sql = "insert into post(title,content,user_id,image1,image2,image3,image4,image5,image6) values(?,?,?,?,?,?,?,?,?)";
+        int i = db.executeUpdate(sql, title, content, userId, image1, image2, image3, image4, image5, image6);
         db.close();
         return i;
     }
@@ -173,6 +180,14 @@ public class user_dao {
         DBHelper db = new DBHelper();
         String sql = "update post set title = ?, content = ? where id = ?";
         int i = db.executeUpdate(sql, title, content, postId);
+        db.close();
+        return i;
+    }
+
+    public int updatePostWithImages(int postId, String title, String content, String image1, String image2, String image3, String image4, String image5, String image6) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "update post set title = ?, content = ?, image1 = ?, image2 = ?, image3 = ?, image4 = ?, image5 = ?, image6 = ? where id = ?";
+        int i = db.executeUpdate(sql, title, content, image1, image2, image3, image4, image5, image6, postId);
         db.close();
         return i;
     }
@@ -223,7 +238,7 @@ public class user_dao {
 
     public ArrayList<CommentModel> findCommentsByPostId(int postId) throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "SELECT c.*, u.username, p.username as parent_username FROM comment c JOIN user u ON c.user_id = u.id LEFT JOIN comment pc ON c.parent_id = pc.id LEFT JOIN user p ON pc.user_id = p.id WHERE c.post_id = ? ORDER BY c.parent_id ASC, c.create_time ASC";
+        String sql = "SELECT c.*, u.username, u.avatar, p.username as parent_username FROM comment c JOIN user u ON c.user_id = u.id LEFT JOIN comment pc ON c.parent_id = pc.id LEFT JOIN user p ON pc.user_id = p.id WHERE c.post_id = ? ORDER BY c.parent_id ASC, c.create_time ASC";
         ArrayList<CommentModel> list = new ArrayList<CommentModel>();
         ResultSet rs = db.executeQuery(sql, postId);
         while (rs.next()){
@@ -232,6 +247,7 @@ public class user_dao {
             comment.setPost_id(rs.getInt("post_id"));
             comment.setUser_id(rs.getInt("user_id"));
             comment.setUsername(rs.getString("username"));
+            comment.setAvatar(rs.getString("avatar"));
             comment.setContent(rs.getString("content"));
             comment.setCreate_time(rs.getString("create_time"));
             comment.setParent_id(rs.getInt("parent_id"));
@@ -282,6 +298,40 @@ public class user_dao {
         return i;
     }
 
+    public ArrayList<user_model> findAllUsers() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM user ORDER BY role ASC, id DESC";
+        ArrayList<user_model> list = new ArrayList<user_model>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()){
+            user_model user = new user_model();
+            user.setUser_id(rs.getInt("id"));
+            user.setUser_name(rs.getString("username"));
+            user.setEmail(rs.getString("email"));
+            user.setRole(rs.getInt("role"));
+            user.setAvatar(rs.getString("avatar"));
+            list.add(user);
+        }
+        db.close();
+        return list;
+    }
+
+    public int deleteUser(int userId) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "DELETE FROM user WHERE id = ?";
+        int i = db.executeUpdate(sql, userId);
+        db.close();
+        return i;
+    }
+
+    public int updateUserRole(int userId, int role) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE user SET role = ? WHERE id = ?";
+        int i = db.executeUpdate(sql, role, userId);
+        db.close();
+        return i;
+    }
+
     public ArrayList<ArticleModel> findArticlesByAuthor(String author) throws SQLException {
         DBHelper db = new DBHelper();
         String sql = "select * from article where author = ? order by update_time desc";
@@ -326,6 +376,10 @@ public class user_dao {
             post.setUser_id(rs.getInt("user_id"));
             post.setUsername(rs.getString("username"));
             post.setCreate_time(rs.getString("create_time"));
+            post.setStatus(rs.getInt("status"));
+            post.setImage1(rs.getString("image1"));
+            post.setImage2(rs.getString("image2"));
+            post.setImage3(rs.getString("image3"));
             list.add(post);
         }
         db.close();

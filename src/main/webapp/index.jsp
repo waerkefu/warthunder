@@ -142,6 +142,8 @@
             background-color: #00c2b3;
         }
 
+        
+
         .publish-form {
             background-color: #1e232a;
             padding: 24px;
@@ -192,6 +194,65 @@
         .form-group textarea {
             min-height: 120px;
             resize: vertical;
+        }
+
+        .image-upload-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .image-upload-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100px;
+            border: 2px dashed #3a4252;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-upload-box:hover {
+            border-color: #00e0d0;
+            background-color: rgba(0, 224, 208, 0.05);
+        }
+
+        .image-upload-box input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .image-upload-box span {
+            font-size: 12px;
+            color: #8892a5;
+        }
+
+        .image-upload-box.has-image {
+            border-style: solid;
+            border-color: #00e0d0;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .form-actions {
@@ -349,7 +410,7 @@
     <ul class="sidebar-menu">
         <li><a href="forum.jsp" class="active">论坛</a></li>
         <li><a href="tutorial.jsp">教程</a></li>
-        <li><a href="stats.jsp">战绩查询</a></li>
+        <li><a href="https://statshark.net" target="_blank">战绩查询</a></li>
         <li><a href="https://warthunder.com/" target="_blank">官网</a></li>
         <!-- 👇 这里就是新增的 个人中心 按钮 -->
         <li><a href="profile">个人中心</a></li>
@@ -382,7 +443,7 @@
     <!-- 发布帖子表单 -->
     <div class="publish-form" id="publishForm">
         <h3>发布新帖子</h3>
-        <form action="publishPost" method="post">
+        <form action="publishPost" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="postTitle">帖子标题</label>
                 <input type="text" id="postTitle" name="title" placeholder="请输入帖子标题" required>
@@ -390,6 +451,36 @@
             <div class="form-group">
                 <label for="postContent">帖子内容</label>
                 <textarea id="postContent" name="content" placeholder="请输入帖子内容" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>上传图片（最多5张）</label>
+                <div class="image-upload-container">
+                    <label class="image-upload-box">
+                        <input type="file" name="image1" accept="image/*" onchange="previewImage(this, 1)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片1</span>
+                    </label>
+                    <label class="image-upload-box">
+                        <input type="file" name="image2" accept="image/*" onchange="previewImage(this, 2)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片2</span>
+                    </label>
+                    <label class="image-upload-box">
+                        <input type="file" name="image3" accept="image/*" onchange="previewImage(this, 3)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片3</span>
+                    </label>
+                    <label class="image-upload-box">
+                        <input type="file" name="image4" accept="image/*" onchange="previewImage(this, 4)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片4</span>
+                    </label>
+                    <label class="image-upload-box">
+                        <input type="file" name="image5" accept="image/*" onchange="previewImage(this, 5)">
+                        <div class="upload-icon">📷</div>
+                        <span>选择图片5</span>
+                    </label>
+                </div>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="togglePublishForm()">取消</button>
@@ -475,6 +566,28 @@
     function confirmAction(message, url) {
         if (confirm(message)) {
             location.href = url;
+        }
+    }
+
+    function previewImage(input, index) {
+        var label = input.parentElement;
+        var files = input.files;
+        if (files.length > 0) {
+            var file = files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'image-preview';
+                label.classList.add('has-image');
+                
+                var existingPreview = label.querySelector('.image-preview');
+                if (existingPreview) {
+                    label.removeChild(existingPreview);
+                }
+                label.appendChild(img);
+            };
+            reader.readAsDataURL(file);
         }
     }
 

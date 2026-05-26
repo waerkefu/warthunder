@@ -55,6 +55,11 @@ public class user_service {
         return userdao.insertPost(userId, title, content);
     }
 
+    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5) {
+        user_dao userdao = new user_dao();
+        return userdao.insertPostWithImages(userId, title, content, image1, image2, image3, image4, image5);
+    }
+
     public int updatePost(int postId, String title, String content) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.updatePost(postId, title, content);

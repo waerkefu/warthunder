@@ -4,16 +4,27 @@ import model.user_model;
 import service.user_service;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @WebServlet("/publishPost")
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 5,
+    maxFileSize = 1024 * 1024 * 50,
+    maxRequestSize = 1024 * 1024 * 100
+)
 public class PublishPostController extends HttpServlet {
+
+    private static final String UPLOAD_DIR = "upload/post";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,11 +56,25 @@ public class PublishPostController extends HttpServlet {
             return;
         }
 
+        String image1 = null, image2 = null, image3 = null, image4 = null, image5 = null;
+        
         try {
+            String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            image1 = uploadImage(req.getPart("image1"), uploadPath);
+            image2 = uploadImage(req.getPart("image2"), uploadPath);
+            image3 = uploadImage(req.getPart("image3"), uploadPath);
+            image4 = uploadImage(req.getPart("image4"), uploadPath);
+            image5 = uploadImage(req.getPart("image5"), uploadPath);
+
             user_service us = new user_service();
             user_model user = us.findUserByUsername(loginUser);
-            
-            int result = us.insertPost(user.getUser_id(), title.trim(), content.trim());
+
+            int result = us.insertPostWithImages(user.getUser_id(), title.trim(), content.trim(), image1, image2, image3, image4, image5);
 
             if (result > 0) {
                 out.println("<script>alert('帖子发布成功！');location.href='index.jsp';</script>");
@@ -60,5 +85,23 @@ public class PublishPostController extends HttpServlet {
             e.printStackTrace();
             out.println("<script>alert('数据库错误！');history.back();</script>");
         }
+    }
+
+    private String uploadImage(Part part, String uploadPath) throws IOException {
+        if (part == null || part.getSize() == 0) {
+            return null;
+        }
+
+        String fileName = part.getSubmittedFileName();
+        if (fileName == null || fileName.isEmpty()) {
+            return null;
+        }
+
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String newFileName = UUID.randomUUID().toString() + extension;
+        String filePath = uploadPath + File.separator + newFileName;
+
+        part.write(filePath);
+        return UPLOAD_DIR + "/" + newFileName;
     }
 }

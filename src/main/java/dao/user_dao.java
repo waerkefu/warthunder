@@ -142,6 +142,12 @@ public class user_dao {
             post.setUser_id(rs.getInt("user_id"));
             post.setUsername(rs.getString("username"));
             post.setCreate_time(rs.getString("create_time"));
+            post.setStatus(rs.getInt("status"));
+            post.setImage1(rs.getString("image1"));
+            post.setImage2(rs.getString("image2"));
+            post.setImage3(rs.getString("image3"));
+            post.setImage4(rs.getString("image4"));
+            post.setImage5(rs.getString("image5"));
         }
         db.close();
         return post;
@@ -151,6 +157,14 @@ public class user_dao {
         DBHelper db = new DBHelper();
         String sql = "insert into post(title,content,user_id) values(?,?,?)";
         int i = db.executeUpdate(sql, title, content, userId);
+        db.close();
+        return i;
+    }
+
+    public int insertPostWithImages(int userId, String title, String content, String image1, String image2, String image3, String image4, String image5) {
+        DBHelper db = new DBHelper();
+        String sql = "insert into post(title,content,user_id,image1,image2,image3,image4,image5) values(?,?,?,?,?,?,?,?)";
+        int i = db.executeUpdate(sql, title, content, userId, image1, image2, image3, image4, image5);
         db.close();
         return i;
     }

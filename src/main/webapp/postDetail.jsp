@@ -135,6 +135,31 @@
             white-space: pre-wrap;
         }
 
+        .post-images {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #2d333b;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .post-image:hover {
+            transform: scale(1.02);
+        }
+
         .post-actions {
             display: flex;
             gap: 12px;
@@ -388,6 +413,18 @@
             </div>
         </div>
         <div class="post-content"><%= post.getContent() %></div>
+        
+        <% if (post.hasImages()) { %>
+        <div class="post-images">
+            <div class="images-grid">
+                <% if (post.getImage1() != null) { %><img src="<%= post.getImage1() %>" class="post-image" alt="图片1"><% } %>
+                <% if (post.getImage2() != null) { %><img src="<%= post.getImage2() %>" class="post-image" alt="图片2"><% } %>
+                <% if (post.getImage3() != null) { %><img src="<%= post.getImage3() %>" class="post-image" alt="图片3"><% } %>
+                <% if (post.getImage4() != null) { %><img src="<%= post.getImage4() %>" class="post-image" alt="图片4"><% } %>
+                <% if (post.getImage5() != null) { %><img src="<%= post.getImage5() %>" class="post-image" alt="图片5"><% } %>
+            </div>
+        </div>
+        <% } %>
         
         <%
             boolean isAdmin = false;

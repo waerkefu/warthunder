@@ -95,6 +95,50 @@
             border-bottom: 1px solid #2d333b;
         }
 
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-right: 24px;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            gap: 8px;
+            margin-right: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            background-color: #252a32;
+            border: 1px solid #3a4252;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00e0d0;
+        }
+
+        .btn-search {
+            padding: 10px 20px;
+            background-color: #00e0d0;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-search:hover {
+            background-color: #00c2b3;
+        }
+
         .top-nav .nav-actions {
             display: flex;
             gap: 16px;
@@ -504,6 +548,12 @@
     <!-- 顶部导航 -->
     <div class="top-nav">
         <div class="nav-title">中文论坛</div>
+        <div class="search-bar">
+            <form action="search" method="get">
+                <input type="text" class="search-input" name="keyword" placeholder="搜索帖子...">
+                <button type="submit" class="btn-search">搜索</button>
+            </form>
+        </div>
         <div class="nav-actions">
             <%
                 String loginUser = (String) session.getAttribute("loginUser");

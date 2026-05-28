@@ -130,6 +130,11 @@ public class user_service {
         return userdao.findAllUsers();
     }
 
+    public ArrayList<user_model> searchUsers(String keyword) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.searchUsers(keyword);
+    }
+
     public int deleteUser(int userId) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.deleteUser(userId);

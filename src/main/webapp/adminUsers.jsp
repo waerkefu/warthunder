@@ -41,6 +41,43 @@
             font-size: 24px;
         }
 
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            display: flex;
+            gap: 8px;
+            margin: 0 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            background-color: #252a32;
+            border: 1px solid #3a4252;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00e0d0;
+        }
+
+        .btn-search {
+            padding: 10px 20px;
+            background-color: #00e0d0;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-search:hover {
+            background-color: #00c2b3;
+        }
+
         .btn-back {
             padding: 8px 16px;
             background-color: #3a4252;
@@ -159,7 +196,11 @@
     <div class="container">
         <div class="header">
             <h1>用户管理</h1>
-            <a href="index.jsp" class="btn-back">返回首页</a>
+            <form action="adminUsers.jsp" method="get" class="search-bar">
+                <input type="text" class="search-input" name="keyword" placeholder="搜索用户名或邮箱..." value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>">
+                <button type="submit" class="btn-search">搜索</button>
+            </form>
+            <a href="adminUsers.jsp" class="btn-back">返回首页</a>
         </div>
 
         <table class="user-table">
@@ -192,7 +233,13 @@
                 </tr>
                 <%
                             } else {
-                                ArrayList<user_model> users = us.findAllUsers();
+                                String keyword = request.getParameter("keyword");
+                                ArrayList<user_model> users;
+                                if (keyword != null && !keyword.trim().isEmpty()) {
+                                    users = us.searchUsers(keyword.trim());
+                                } else {
+                                    users = us.findAllUsers();
+                                }
                                 if (users != null && !users.isEmpty()) {
                                     for (user_model user : users) {
                 %>

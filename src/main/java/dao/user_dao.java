@@ -316,6 +316,25 @@ public class user_dao {
         return list;
     }
 
+    public ArrayList<user_model> searchUsers(String keyword) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM user WHERE username LIKE ? OR email LIKE ? ORDER BY role ASC, id DESC";
+        String likeKeyword = "%" + keyword + "%";
+        ArrayList<user_model> list = new ArrayList<user_model>();
+        ResultSet rs = db.executeQuery(sql, likeKeyword, likeKeyword);
+        while (rs.next()){
+            user_model user = new user_model();
+            user.setUser_id(rs.getInt("id"));
+            user.setUser_name(rs.getString("username"));
+            user.setEmail(rs.getString("email"));
+            user.setRole(rs.getInt("role"));
+            user.setAvatar(rs.getString("avatar"));
+            list.add(user);
+        }
+        db.close();
+        return list;
+    }
+
     public int deleteUser(int userId) throws SQLException {
         DBHelper db = new DBHelper();
         String sql = "DELETE FROM user WHERE id = ?";

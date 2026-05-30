@@ -26,6 +26,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="model.user_model" %>
 <%@ page import="model.VideoModel" %>
+<%@ page import="model.TutorialArticleModel" %>
 <%@ page import="service.user_service" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
@@ -255,6 +256,22 @@
             gap: 16px;
             font-size: 12px;
             color: #8892a5;
+        }
+
+        .article-section {
+            margin-bottom: 32px;
+        }
+
+        .article-thumbnail-placeholder {
+            width: 120px;
+            height: 80px;
+            background-color: #252a32;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
         }
 
 
@@ -504,208 +521,355 @@
             </div>
 
             <div class="category-grid">
+                <%
+                    // 获取各分类的数量
+                    user_service us = new user_service();
+                    int mapsArticleCount = us.getTutorialArticleCountByCategory("maps");
+                    int mapsVideoCount = us.getTutorialVideoCountByCategory("maps");
+                    int vehiclesArticleCount = us.getTutorialArticleCountByCategory("vehicles");
+                    int vehiclesVideoCount = us.getTutorialVideoCountByCategory("vehicles");
+                    int weakspotsArticleCount = us.getTutorialArticleCountByCategory("weakspots");
+                    int weakspotsVideoCount = us.getTutorialVideoCountByCategory("weakspots");
+                    
+                    int totalArticleCount = mapsArticleCount + vehiclesArticleCount + weakspotsArticleCount;
+                    int totalVideoCount = mapsVideoCount + vehiclesVideoCount + weakspotsVideoCount;
+                %>
+                <div class="category-card" onclick="showCategory('all')">
+                    <div class="category-icon">📚</div>
+                    <h3 class="category-title">全部内容</h3>
+                    <p class="category-desc">查看所有教程文章和视频</p>
+                    <span class="category-count"><%= totalArticleCount %> 篇文章 · <%= totalVideoCount %> 个视频</span>
+                </div>
+
                 <div class="category-card" onclick="showCategory('maps')">
                     <div class="category-icon">🗺️</div>
                     <h3 class="category-title">地图解析</h3>
                     <p class="category-desc">深入了解各张地图的地形特点、战略要点和最佳战术路线</p>
-                    <span class="category-count">12 篇教程</span>
+                    <span class="category-count"><%= mapsArticleCount %> 篇文章 · <%= mapsVideoCount %> 个视频</span>
                 </div>
 
                 <div class="category-card" onclick="showCategory('vehicles')">
                     <div class="category-icon">⚔️</div>
                     <h3 class="category-title">载具测评</h3>
                     <p class="category-desc">详细评测各类坦克、飞机、舰船的性能特点和战斗表现</p>
-                    <span class="category-count">28 篇教程</span>
+                    <span class="category-count"><%= vehiclesArticleCount %> 篇文章 · <%= vehiclesVideoCount %> 个视频</span>
                 </div>
 
                 <div class="category-card" onclick="showCategory('weakspots')">
                     <div class="category-icon">🎯</div>
                     <h3 class="category-title">车辆弱点</h3>
                     <p class="category-desc">精准定位各系载具的装甲弱点，提升击穿效率</p>
-                    <span class="category-count">15 篇教程</span>
+                    <span class="category-count"><%= weakspotsArticleCount %> 篇文章 · <%= weakspotsVideoCount %> 个视频</span>
                 </div>
             </div>
 
-            <%
-                ArrayList<VideoModel> allVideos = null;
-                try {
-                    user_service us = new user_service();
-                    allVideos = us.findAllVideos();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                if (allVideos != null && !allVideos.isEmpty()) {
-                    VideoModel featuredVideo = allVideos.get(0);
-            %>
-            <div class="video-section">
-                <h2 class="section-title">🎬 视频教程精选</h2>
-                <div class="video-card">
-                    <div class="video-thumbnail">
-                        <img 
-                            src="<%= getThumbnailUrl(featuredVideo) %>" 
-                            alt="视频缩略图"
-                            onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';"
-                        >
-                        <div class="video-play-btn" onclick="playVideo('<%= featuredVideo.getBvid() %>')"></div>
+            <!-- 默认显示全部内容 -->
+            <div id="all-section" class="section-content">
+                <%
+                    ArrayList<VideoModel> allVideos = null;
+                    ArrayList<TutorialArticleModel> allArticles = null;
+                    try {
+                        allVideos = us.findAllVideos();
+                        allArticles = us.findAllTutorialArticles();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                %>
+                
+                <!-- 视频区域 -->
+                <% if (allVideos != null && !allVideos.isEmpty()) { %>
+                <div class="video-section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                        <h2 class="section-title">🎬 视频教程</h2>
+                        <a href="adminVideos.jsp" style="padding:8px 16px;background:#fb7299;color:#fff;border-radius:4px;text-decoration:none;font-size:14px;">发布视频</a>
                     </div>
-                    <div class="video-info">
-                        <div class="video-title">
-                            <span class="bilibili-badge">Bilibili</span>
-                            <%= featuredVideo.getTitle() %>
+                    <div class="video-grid">
+                        <% for (VideoModel video : allVideos) { %>
+                        <div class="video-compact" onclick="playVideo('<%= video.getBvid() %>')">
+                            <div class="video-compact-thumb">
+                                <img 
+                                    src="<%= getThumbnailUrl(video) %>" 
+                                    alt="视频缩略图"
+                                    onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';">
+                            </div>
+                            <div class="video-compact-info">
+                                <div class="video-compact-title">
+                                    <span class="bilibili-badge">BV:<%= video.getBvid() %></span>
+                                    <%= video.getTitle() %>
+                                </div>
+                                <div class="video-compact-meta"><%= formatViewCount(video.getViewCount()) %>播放 · <%= video.getCreateTime() != null ? video.getCreateTime().substring(0, 10) : "" %></div>
+                            </div>
                         </div>
-                        <% if (featuredVideo.getDescription() != null && !featuredVideo.getDescription().isEmpty()) { %>
-                        <p class="video-desc"><%= featuredVideo.getDescription() %></p>
                         <% } %>
-                        <div class="video-meta">
-                            <span>👁️ <%= formatViewCount(featuredVideo.getViewCount()) %></span>
-                            <span>👍 <%= featuredVideo.getLikes() %></span>
-                            <span>📅 <%= featuredVideo.getCreateTime() != null ? featuredVideo.getCreateTime().substring(0, 10) : "" %></span>
-                            <span>👤 <%= featuredVideo.getAuthor() != null ? featuredVideo.getAuthor() : "未知" %></span>
-                        </div>
                     </div>
                 </div>
-
-                <% if (allVideos.size() > 1) { %>
-                <div class="video-grid">
-                    <%
-                        int count = 0;
-                        for (int i = 1; i < allVideos.size() && count < 4; i++) {
-                            VideoModel video = allVideos.get(i);
-                            count++;
-                    %>
-                    <div class="video-compact" onclick="playVideo('<%= video.getBvid() %>')">
-                        <div class="video-compact-thumb">
-                            <img 
-                                src="<%= getThumbnailUrl(video) %>" 
-                                alt="视频缩略图"
-                                onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';"
-                            >
-                        </div>
-                        <div class="video-compact-info">
-                            <div class="video-compact-title">
-                                <span class="bilibili-badge">BV:<%= video.getBvid() %></span>
-                                <%= video.getTitle() %>
-                            </div>
-                            <div class="video-compact-meta"><%= formatViewCount(video.getViewCount()) %>播放 · <%= video.getCreateTime() != null ? video.getCreateTime().substring(0, 10) : "" %></div>
-                        </div>
+                <% } %>
+                
+                <!-- 文章区域 -->
+                <% if (allArticles != null && !allArticles.isEmpty()) { %>
+                <div class="article-section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                        <h2 class="section-title">📖 教程文章</h2>
+                        <a href="publishTutorialArticle.jsp" style="padding:8px 16px;background:#00e0d0;color:#000;border-radius:4px;text-decoration:none;font-size:14px;">发布文章</a>
                     </div>
-                    <%
-                        }
-                    %>
+                    <div class="article-list">
+                        <% for (TutorialArticleModel article : allArticles) { %>
+                        <div class="article-card">
+                            <% if (article.getImage1() != null) { %>
+                            <img src="<%= article.getImage1() %>" class="article-thumbnail" alt="文章缩略图" onerror="this.style.display='none'">
+                            <% } else { %>
+                            <div class="article-thumbnail-placeholder"><%= article.getCategoryIcon() %></div>
+                            <% } %>
+                            <div class="article-content">
+                                <a href="tutorialArticleDetail?id=<%= article.getId() %>" class="article-title"><%= article.getTitle() %></a>
+                                <div class="article-meta">
+                                    <span>👤 <%= article.getUsername() != null ? article.getUsername() : "未知" %></span>
+                                    <span>👁️ <%= article.getViewCount() %></span>
+                                    <span>📅 <%= article.getCreateTime() != null ? article.getCreateTime().substring(0, 10) : "" %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+                
+                <% if ((allVideos == null || allVideos.isEmpty()) && (allArticles == null || allArticles.isEmpty())) { %>
+                <div class="empty-state">
+                    <p>暂无内容，快来发布第一篇教程吧！</p>
                 </div>
                 <% } %>
             </div>
-            <%
-                }
-            %>
 
-            <div id="maps-section" class="section-content">
+            <!-- 地图解析区域 -->
+            <div id="maps-section" class="section-content" style="display:none;">
                 <h2 class="section-title">🗺️ 地图解析</h2>
-                <div class="article-list">
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=war%20thunder%20map%20overview%20military%20battlefield&image_size=landscape_4_3" class="article-thumbnail" alt="地图缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">诺曼底登陆地图深度解析</a>
-                            <div class="article-meta">
-                                <span>作者: 战术大师</span>
-                                <span>发布时间: 2026-05-20</span>
-                            </div>
-                        </div>
+                
+                <%
+                    ArrayList<VideoModel> mapsVideos = null;
+                    ArrayList<TutorialArticleModel> mapsArticles = null;
+                    try {
+                        mapsVideos = us.findTutorialVideosByCategory("maps");
+                        mapsArticles = us.findTutorialArticlesByCategory("maps");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                %>
+                
+                <!-- 视频区域 -->
+                <% if (mapsVideos != null && !mapsVideos.isEmpty()) { %>
+                <div class="video-section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="color:#00e0d0;">视频教程</h3>
+                        <a href="adminVideos.jsp" style="padding:6px 12px;background:#fb7299;color:#fff;border-radius:4px;text-decoration:none;font-size:12px;">发布视频</a>
                     </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=desert%20military%20map%20tank%20battle&image_size=landscape_4_3" class="article-thumbnail" alt="地图缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">阿拉曼战役地图战术要点</a>
-                            <div class="article-meta">
-                                <span>作者: 沙漠之狐</span>
-                                <span>发布时间: 2026-05-18</span>
+                    <div class="video-grid">
+                        <% for (VideoModel video : mapsVideos) { %>
+                        <div class="video-compact" onclick="playVideo('<%= video.getBvid() %>')">
+                            <div class="video-compact-thumb">
+                                <img 
+                                    src="<%= getThumbnailUrl(video) %>" 
+                                    alt="视频缩略图"
+                                    onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';">
+                            </div>
+                            <div class="video-compact-info">
+                                <div class="video-compact-title">
+                                    <span class="bilibili-badge">BV:<%= video.getBvid() %></span>
+                                    <%= video.getTitle() %>
+                                </div>
+                                <div class="video-compact-meta"><%= formatViewCount(video.getViewCount()) %>播放 · <%= video.getCreateTime() != null ? video.getCreateTime().substring(0, 10) : "" %></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=urban%20city%20battle%20map%20warfare&image_size=landscape_4_3" class="article-thumbnail" alt="地图缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">柏林战役城市巷战指南</a>
-                            <div class="article-meta">
-                                <span>作者: 城市猎人</span>
-                                <span>发布时间: 2026-05-15</span>
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
                 </div>
+                <% } %>
+                
+                <!-- 文章区域 -->
+                <% if (mapsArticles != null && !mapsArticles.isEmpty()) { %>
+                <div class="article-section">
+                    <h3 style="color:#00e0d0;margin-bottom:16px;">教程文章</h3>
+                    <div class="article-list">
+                        <% for (TutorialArticleModel article : mapsArticles) { %>
+                        <div class="article-card">
+                            <% if (article.getImage1() != null) { %>
+                            <img src="<%= article.getImage1() %>" class="article-thumbnail" alt="文章缩略图" onerror="this.style.display='none'">
+                            <% } else { %>
+                            <div class="article-thumbnail-placeholder">🗺️</div>
+                            <% } %>
+                            <div class="article-content">
+                                <a href="tutorialArticleDetail?id=<%= article.getId() %>" class="article-title"><%= article.getTitle() %></a>
+                                <div class="article-meta">
+                                    <span>👤 <%= article.getUsername() != null ? article.getUsername() : "未知" %></span>
+                                    <span>👁️ <%= article.getViewCount() %></span>
+                                    <span>📅 <%= article.getCreateTime() != null ? article.getCreateTime().substring(0, 10) : "" %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+                
+                <% if ((mapsVideos == null || mapsVideos.isEmpty()) && (mapsArticles == null || mapsArticles.isEmpty())) { %>
+                <div class="empty-state">
+                    <p>暂无内容，快来发布第一篇教程吧！</p>
+                </div>
+                <% } %>
             </div>
 
-            <div id="vehicles-section" class="section-content">
+            <!-- 载具测评区域 -->
+            <div id="vehicles-section" class="section-content" style="display:none;">
                 <h2 class="section-title">⚔️ 载具测评</h2>
-                <div class="article-list">
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=WWII%20tank%20heavy%20armor%20military&image_size=landscape_4_3" class="article-thumbnail" alt="载具缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">虎式坦克全面测评</a>
-                            <div class="article-meta">
-                                <span>作者: 重装甲师</span>
-                                <span>发布时间: 2026-05-22</span>
-                            </div>
-                        </div>
+                
+                <%
+                    ArrayList<VideoModel> vehiclesVideos = null;
+                    ArrayList<TutorialArticleModel> vehiclesArticles = null;
+                    try {
+                        vehiclesVideos = us.findTutorialVideosByCategory("vehicles");
+                        vehiclesArticles = us.findTutorialArticlesByCategory("vehicles");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                %>
+                
+                <!-- 视频区域 -->
+                <% if (vehiclesVideos != null && !vehiclesVideos.isEmpty()) { %>
+                <div class="video-section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="color:#00e0d0;">视频教程</h3>
+                        <a href="adminVideos.jsp" style="padding:6px 12px;background:#fb7299;color:#fff;border-radius:4px;text-decoration:none;font-size:12px;">发布视频</a>
                     </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=modern%20fighter%20jet%20aircraft%20military&image_size=landscape_4_3" class="article-thumbnail" alt="载具缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">F-16战斗机性能分析</a>
-                            <div class="article-meta">
-                                <span>作者: 王牌飞行员</span>
-                                <span>发布时间: 2026-05-21</span>
+                    <div class="video-grid">
+                        <% for (VideoModel video : vehiclesVideos) { %>
+                        <div class="video-compact" onclick="playVideo('<%= video.getBvid() %>')">
+                            <div class="video-compact-thumb">
+                                <img 
+                                    src="<%= getThumbnailUrl(video) %>" 
+                                    alt="视频缩略图"
+                                    onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';">
+                            </div>
+                            <div class="video-compact-info">
+                                <div class="video-compact-title">
+                                    <span class="bilibili-badge">BV:<%= video.getBvid() %></span>
+                                    <%= video.getTitle() %>
+                                </div>
+                                <div class="video-compact-meta"><%= formatViewCount(video.getViewCount()) %>播放 · <%= video.getCreateTime() != null ? video.getCreateTime().substring(0, 10) : "" %></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=naval%20battleship%20warship%20military&image_size=landscape_4_3" class="article-thumbnail" alt="载具缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">俾斯麦号战列舰详解</a>
-                            <div class="article-meta">
-                                <span>作者: 海军上将</span>
-                                <span>发布时间: 2026-05-19</span>
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
                 </div>
+                <% } %>
+                
+                <!-- 文章区域 -->
+                <% if (vehiclesArticles != null && !vehiclesArticles.isEmpty()) { %>
+                <div class="article-section">
+                    <h3 style="color:#00e0d0;margin-bottom:16px;">教程文章</h3>
+                    <div class="article-list">
+                        <% for (TutorialArticleModel article : vehiclesArticles) { %>
+                        <div class="article-card">
+                            <% if (article.getImage1() != null) { %>
+                            <img src="<%= article.getImage1() %>" class="article-thumbnail" alt="文章缩略图" onerror="this.style.display='none'">
+                            <% } else { %>
+                            <div class="article-thumbnail-placeholder">⚔️</div>
+                            <% } %>
+                            <div class="article-content">
+                                <a href="tutorialArticleDetail?id=<%= article.getId() %>" class="article-title"><%= article.getTitle() %></a>
+                                <div class="article-meta">
+                                    <span>👤 <%= article.getUsername() != null ? article.getUsername() : "未知" %></span>
+                                    <span>👁️ <%= article.getViewCount() %></span>
+                                    <span>📅 <%= article.getCreateTime() != null ? article.getCreateTime().substring(0, 10) : "" %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+                
+                <% if ((vehiclesVideos == null || vehiclesVideos.isEmpty()) && (vehiclesArticles == null || vehiclesArticles.isEmpty())) { %>
+                <div class="empty-state">
+                    <p>暂无内容，快来发布第一篇教程吧！</p>
+                </div>
+                <% } %>
             </div>
 
-            <div id="weakspots-section" class="section-content">
+            <!-- 车辆弱点区域 -->
+            <div id="weakspots-section" class="section-content" style="display:none;">
                 <h2 class="section-title">🎯 车辆弱点分析</h2>
-                <div class="article-list">
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=tank%20armor%20weak%20points%20diagram&image_size=landscape_4_3" class="article-thumbnail" alt="弱点分析缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">苏联坦克弱点全解析</a>
-                            <div class="article-meta">
-                                <span>作者: 装甲专家</span>
-                                <span>发布时间: 2026-05-23</span>
-                            </div>
-                        </div>
+                
+                <%
+                    ArrayList<VideoModel> weakspotsVideos = null;
+                    ArrayList<TutorialArticleModel> weakspotsArticles = null;
+                    try {
+                        weakspotsVideos = us.findTutorialVideosByCategory("weakspots");
+                        weakspotsArticles = us.findTutorialArticlesByCategory("weakspots");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                %>
+                
+                <!-- 视频区域 -->
+                <% if (weakspotsVideos != null && !weakspotsVideos.isEmpty()) { %>
+                <div class="video-section">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="color:#00e0d0;">视频教程</h3>
+                        <a href="adminVideos.jsp" style="padding:6px 12px;background:#fb7299;color:#fff;border-radius:4px;text-decoration:none;font-size:12px;">发布视频</a>
                     </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=american%20tank%20armor%20analysis&image_size=landscape_4_3" class="article-thumbnail" alt="弱点分析缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">美国坦克弱点指南</a>
-                            <div class="article-meta">
-                                <span>作者: 穿甲高手</span>
-                                <span>发布时间: 2026-05-20</span>
+                    <div class="video-grid">
+                        <% for (VideoModel video : weakspotsVideos) { %>
+                        <div class="video-compact" onclick="playVideo('<%= video.getBvid() %>')">
+                            <div class="video-compact-thumb">
+                                <img 
+                                    src="<%= getThumbnailUrl(video) %>" 
+                                    alt="视频缩略图"
+                                    onerror="this.onerror=null;this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 9%22><rect fill=%22%23252a32%22 width=%2216%22 height=%229%22><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%220.8%22 fill=%22%2300e0d0%22>🎬</text></svg>';">
+                            </div>
+                            <div class="video-compact-info">
+                                <div class="video-compact-title">
+                                    <span class="bilibili-badge">BV:<%= video.getBvid() %></span>
+                                    <%= video.getTitle() %>
+                                </div>
+                                <div class="video-compact-meta"><%= formatViewCount(video.getViewCount()) %>播放 · <%= video.getCreateTime() != null ? video.getCreateTime().substring(0, 10) : "" %></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="article-card">
-                        <img src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=german%20tank%20weak%20spots%20military&image_size=landscape_4_3" class="article-thumbnail" alt="弱点分析缩略图">
-                        <div class="article-content">
-                            <a href="#" class="article-title">德系坦克弱点详解</a>
-                            <div class="article-meta">
-                                <span>作者: 战术分析师</span>
-                                <span>发布时间: 2026-05-17</span>
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
                 </div>
+                <% } %>
+                
+                <!-- 文章区域 -->
+                <% if (weakspotsArticles != null && !weakspotsArticles.isEmpty()) { %>
+                <div class="article-section">
+                    <h3 style="color:#00e0d0;margin-bottom:16px;">教程文章</h3>
+                    <div class="article-list">
+                        <% for (TutorialArticleModel article : weakspotsArticles) { %>
+                        <div class="article-card">
+                            <% if (article.getImage1() != null) { %>
+                            <img src="<%= article.getImage1() %>" class="article-thumbnail" alt="文章缩略图" onerror="this.style.display='none'">
+                            <% } else { %>
+                            <div class="article-thumbnail-placeholder">🎯</div>
+                            <% } %>
+                            <div class="article-content">
+                                <a href="tutorialArticleDetail?id=<%= article.getId() %>" class="article-title"><%= article.getTitle() %></a>
+                                <div class="article-meta">
+                                    <span>👤 <%= article.getUsername() != null ? article.getUsername() : "未知" %></span>
+                                    <span>👁️ <%= article.getViewCount() %></span>
+                                    <span>📅 <%= article.getCreateTime() != null ? article.getCreateTime().substring(0, 10) : "" %></span>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+                
+                <% if ((weakspotsVideos == null || weakspotsVideos.isEmpty()) && (weakspotsArticles == null || weakspotsArticles.isEmpty())) { %>
+                <div class="empty-state">
+                    <p>暂无内容，快来发布第一篇教程吧！</p>
+                </div>
+                <% } %>
             </div>
         </div>
     </div>

@@ -4,6 +4,7 @@ import dao.user_dao;
 import model.ArticleModel;
 import model.CommentModel;
 import model.PostModel;
+import model.TutorialArticleModel;
 import model.VideoModel;
 import model.user_model;
 
@@ -201,5 +202,57 @@ public class user_service {
     public ArrayList<VideoModel> getFeaturedVideos(int limit) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.getFeaturedVideos(limit);
+    }
+
+    // ==================== 教程文章相关方法 ====================
+
+    public ArrayList<TutorialArticleModel> findAllTutorialArticles() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findAllTutorialArticles();
+    }
+
+    public ArrayList<TutorialArticleModel> findTutorialArticlesByCategory(String category) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findTutorialArticlesByCategory(category);
+    }
+
+    public TutorialArticleModel findTutorialArticleById(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findTutorialArticleById(id);
+    }
+
+    public int addTutorialArticle(TutorialArticleModel article) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.addTutorialArticle(article);
+    }
+
+    public int updateTutorialArticle(TutorialArticleModel article) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.updateTutorialArticle(article);
+    }
+
+    public int deleteTutorialArticle(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.deleteTutorialArticle(id);
+    }
+
+    public int incrementTutorialArticleViewCount(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.incrementTutorialArticleViewCount(id);
+    }
+
+    public int getTutorialArticleCountByCategory(String category) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getTutorialArticleCountByCategory(category);
+    }
+
+    public int getTutorialVideoCountByCategory(String category) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getTutorialVideoCountByCategory(category);
+    }
+
+    public ArrayList<VideoModel> findTutorialVideosByCategory(String category) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findTutorialVideosByCategory(category);
     }
 }

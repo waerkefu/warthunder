@@ -54,3 +54,22 @@ CREATE TABLE tutorial_videos (
     author VARCHAR(50) COMMENT 'UP主',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE tutorial_articles (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '教程ID',
+    title VARCHAR(200) NOT NULL COMMENT '教程标题',
+    content TEXT NOT NULL COMMENT '教程内容',
+    category ENUM('maps','vehicles','weakspots') NOT NULL DEFAULT 'maps' COMMENT '分类',
+    user_id INT NOT NULL COMMENT '作者ID',
+    username VARCHAR(50) COMMENT '作者用户名（冗余）',
+    image1 VARCHAR(255) DEFAULT NULL COMMENT '图片1',
+    image2 VARCHAR(255) DEFAULT NULL COMMENT '图片2',
+    image3 VARCHAR(255) DEFAULT NULL COMMENT '图片3',
+    image4 VARCHAR(255) DEFAULT NULL COMMENT '图片4',
+    image5 VARCHAR(255) DEFAULT NULL COMMENT '图片5',
+    image6 VARCHAR(255) DEFAULT NULL COMMENT '图片6',
+    view_count INT DEFAULT 0 COMMENT '浏览量',
+    status INT DEFAULT 1 COMMENT '状态：1=正常 0=隐藏',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='教程文章表';

@@ -4,6 +4,7 @@ import db.DBHelper;
 import model.ArticleModel;
 import model.CommentModel;
 import model.PostModel;
+import model.TutorialArticleModel;
 import model.VideoModel;
 import model.user_model;
 
@@ -514,6 +515,176 @@ public class user_dao {
         ArrayList<VideoModel> list = new ArrayList<VideoModel>();
         ResultSet rs = db.executeQuery(sql, limit);
         while (rs.next()){
+            VideoModel video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setCreateTime(rs.getString("create_time"));
+            list.add(video);
+        }
+        db.close();
+        return list;
+    }
+
+    // ==================== 教程文章相关方法 ====================
+
+    public ArrayList<TutorialArticleModel> findAllTutorialArticles() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_articles WHERE status = 1 ORDER BY create_time DESC";
+        ArrayList<TutorialArticleModel> list = new ArrayList<TutorialArticleModel>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()) {
+            TutorialArticleModel article = new TutorialArticleModel();
+            article.setId(rs.getInt("id"));
+            article.setTitle(rs.getString("title"));
+            article.setContent(rs.getString("content"));
+            article.setCategory(rs.getString("category"));
+            article.setUserId(rs.getInt("user_id"));
+            article.setUsername(rs.getString("username"));
+            article.setImage1(rs.getString("image1"));
+            article.setImage2(rs.getString("image2"));
+            article.setImage3(rs.getString("image3"));
+            article.setImage4(rs.getString("image4"));
+            article.setImage5(rs.getString("image5"));
+            article.setImage6(rs.getString("image6"));
+            article.setViewCount(rs.getInt("view_count"));
+            article.setStatus(rs.getInt("status"));
+            article.setCreateTime(rs.getString("create_time"));
+            list.add(article);
+        }
+        db.close();
+        return list;
+    }
+
+    public ArrayList<TutorialArticleModel> findTutorialArticlesByCategory(String category) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_articles WHERE category = ? AND status = 1 ORDER BY create_time DESC";
+        ArrayList<TutorialArticleModel> list = new ArrayList<TutorialArticleModel>();
+        ResultSet rs = db.executeQuery(sql, category);
+        while (rs.next()) {
+            TutorialArticleModel article = new TutorialArticleModel();
+            article.setId(rs.getInt("id"));
+            article.setTitle(rs.getString("title"));
+            article.setContent(rs.getString("content"));
+            article.setCategory(rs.getString("category"));
+            article.setUserId(rs.getInt("user_id"));
+            article.setUsername(rs.getString("username"));
+            article.setImage1(rs.getString("image1"));
+            article.setImage2(rs.getString("image2"));
+            article.setImage3(rs.getString("image3"));
+            article.setImage4(rs.getString("image4"));
+            article.setImage5(rs.getString("image5"));
+            article.setImage6(rs.getString("image6"));
+            article.setViewCount(rs.getInt("view_count"));
+            article.setStatus(rs.getInt("status"));
+            article.setCreateTime(rs.getString("create_time"));
+            list.add(article);
+        }
+        db.close();
+        return list;
+    }
+
+    public TutorialArticleModel findTutorialArticleById(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_articles WHERE id = ?";
+        ResultSet rs = db.executeQuery(sql, id);
+        TutorialArticleModel article = null;
+        if (rs.next()) {
+            article = new TutorialArticleModel();
+            article.setId(rs.getInt("id"));
+            article.setTitle(rs.getString("title"));
+            article.setContent(rs.getString("content"));
+            article.setCategory(rs.getString("category"));
+            article.setUserId(rs.getInt("user_id"));
+            article.setUsername(rs.getString("username"));
+            article.setImage1(rs.getString("image1"));
+            article.setImage2(rs.getString("image2"));
+            article.setImage3(rs.getString("image3"));
+            article.setImage4(rs.getString("image4"));
+            article.setImage5(rs.getString("image5"));
+            article.setImage6(rs.getString("image6"));
+            article.setViewCount(rs.getInt("view_count"));
+            article.setStatus(rs.getInt("status"));
+            article.setCreateTime(rs.getString("create_time"));
+        }
+        db.close();
+        return article;
+    }
+
+    public int addTutorialArticle(TutorialArticleModel article) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "INSERT INTO tutorial_articles (title, content, category, user_id, username, image1, image2, image3, image4, image5, image6) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        int result = db.executeUpdate(sql, article.getTitle(), article.getContent(), article.getCategory(), 
+            article.getUserId(), article.getUsername(), article.getImage1(), article.getImage2(), 
+            article.getImage3(), article.getImage4(), article.getImage5(), article.getImage6());
+        db.close();
+        return result;
+    }
+
+    public int updateTutorialArticle(TutorialArticleModel article) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_articles SET title = ?, content = ?, category = ?, image1 = ?, image2 = ?, image3 = ?, image4 = ?, image5 = ?, image6 = ? WHERE id = ?";
+        int result = db.executeUpdate(sql, article.getTitle(), article.getContent(), article.getCategory(),
+            article.getImage1(), article.getImage2(), article.getImage3(), article.getImage4(), 
+            article.getImage5(), article.getImage6(), article.getId());
+        db.close();
+        return result;
+    }
+
+    public int deleteTutorialArticle(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "DELETE FROM tutorial_articles WHERE id = ?";
+        int result = db.executeUpdate(sql, id);
+        db.close();
+        return result;
+    }
+
+    public int incrementTutorialArticleViewCount(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_articles SET view_count = view_count + 1 WHERE id = ?";
+        int result = db.executeUpdate(sql, id);
+        db.close();
+        return result;
+    }
+
+    // ==================== 获取分类内容数量 ====================
+
+    public int getTutorialArticleCountByCategory(String category) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT COUNT(*) as count FROM tutorial_articles WHERE category = ? AND status = 1";
+        ResultSet rs = db.executeQuery(sql, category);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt("count");
+        }
+        db.close();
+        return count;
+    }
+
+    public int getTutorialVideoCountByCategory(String category) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT COUNT(*) as count FROM tutorial_videos WHERE category = ?";
+        ResultSet rs = db.executeQuery(sql, category);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt("count");
+        }
+        db.close();
+        return count;
+    }
+
+    public ArrayList<VideoModel> findTutorialVideosByCategory(String category) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_videos WHERE category = ? ORDER BY create_time DESC";
+        ArrayList<VideoModel> list = new ArrayList<VideoModel>();
+        ResultSet rs = db.executeQuery(sql, category);
+        while (rs.next()) {
             VideoModel video = new VideoModel();
             video.setId(rs.getInt("id"));
             video.setBvid(rs.getString("bvid"));

@@ -4,6 +4,7 @@ import dao.user_dao;
 import model.ArticleModel;
 import model.CommentModel;
 import model.PostModel;
+import model.VideoModel;
 import model.user_model;
 
 import java.sql.SQLException;
@@ -158,5 +159,47 @@ public class user_service {
     public ArrayList<PostModel> searchPosts(String keyword) throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.searchPosts(keyword);
+    }
+
+    // ==================== 视频教程相关方法 ====================
+
+    public ArrayList<VideoModel> findAllVideos() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findAllVideos();
+    }
+
+    public ArrayList<VideoModel> findVideosByCategory(String category) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findVideosByCategory(category);
+    }
+
+    public VideoModel findVideoById(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findVideoById(id);
+    }
+
+    public int addVideo(VideoModel video) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.addVideo(video);
+    }
+
+    public int updateVideo(VideoModel video) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.updateVideo(video);
+    }
+
+    public int deleteVideo(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.deleteVideo(id);
+    }
+
+    public int incrementViewCount(int id) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.incrementViewCount(id);
+    }
+
+    public ArrayList<VideoModel> getFeaturedVideos(int limit) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getFeaturedVideos(limit);
     }
 }

@@ -4,6 +4,7 @@ import db.DBHelper;
 import model.ArticleModel;
 import model.CommentModel;
 import model.PostModel;
+import model.VideoModel;
 import model.user_model;
 
 import java.sql.ResultSet;
@@ -400,6 +401,131 @@ public class user_dao {
             post.setImage2(rs.getString("image2"));
             post.setImage3(rs.getString("image3"));
             list.add(post);
+        }
+        db.close();
+        return list;
+    }
+
+    // ==================== 视频教程相关方法 ====================
+
+    public ArrayList<VideoModel> findAllVideos() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_videos ORDER BY create_time DESC";
+        ArrayList<VideoModel> list = new ArrayList<VideoModel>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()){
+            VideoModel video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setCreateTime(rs.getString("create_time"));
+            list.add(video);
+        }
+        db.close();
+        return list;
+    }
+
+    public ArrayList<VideoModel> findVideosByCategory(String category) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_videos WHERE category = ? ORDER BY create_time DESC";
+        ArrayList<VideoModel> list = new ArrayList<VideoModel>();
+        ResultSet rs = db.executeQuery(sql, category);
+        while (rs.next()){
+            VideoModel video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setCreateTime(rs.getString("create_time"));
+            list.add(video);
+        }
+        db.close();
+        return list;
+    }
+
+    public VideoModel findVideoById(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_videos WHERE id = ?";
+        ResultSet rs = db.executeQuery(sql, id);
+        VideoModel video = null;
+        if (rs.next()){
+            video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setCreateTime(rs.getString("create_time"));
+        }
+        db.close();
+        return video;
+    }
+
+    public int addVideo(VideoModel video) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "INSERT INTO tutorial_videos (bvid, title, description, thumbnail_url, category, author) VALUES (?, ?, ?, ?, ?, ?)";
+        int result = db.executeUpdate(sql, video.getBvid(), video.getTitle(), video.getDescription(), video.getThumbnailUrl(), video.getCategory(), video.getAuthor());
+        db.close();
+        return result;
+    }
+
+    public int updateVideo(VideoModel video) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_videos SET bvid = ?, title = ?, description = ?, thumbnail_url = ?, category = ?, author = ? WHERE id = ?";
+        int result = db.executeUpdate(sql, video.getBvid(), video.getTitle(), video.getDescription(), video.getThumbnailUrl(), video.getCategory(), video.getAuthor(), video.getId());
+        db.close();
+        return result;
+    }
+
+    public int deleteVideo(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "DELETE FROM tutorial_videos WHERE id = ?";
+        int result = db.executeUpdate(sql, id);
+        db.close();
+        return result;
+    }
+
+    public int incrementViewCount(int id) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_videos SET view_count = view_count + 1 WHERE id = ?";
+        int result = db.executeUpdate(sql, id);
+        db.close();
+        return result;
+    }
+
+    public ArrayList<VideoModel> getFeaturedVideos(int limit) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_videos ORDER BY view_count DESC, likes DESC LIMIT ?";
+        ArrayList<VideoModel> list = new ArrayList<VideoModel>();
+        ResultSet rs = db.executeQuery(sql, limit);
+        while (rs.next()){
+            VideoModel video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setCreateTime(rs.getString("create_time"));
+            list.add(video);
         }
         db.close();
         return list;

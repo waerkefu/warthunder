@@ -41,3 +41,16 @@ ADD COLUMN `image4` VARCHAR(255) DEFAULT NULL COMMENT '图片4路径',
 ADD COLUMN `image5` VARCHAR(255) DEFAULT NULL COMMENT '图片5路径';
 
 ALTER TABLE `post` ADD COLUMN `image6` VARCHAR(255) DEFAULT NULL COMMENT '图片6路径';
+
+CREATE TABLE tutorial_videos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    bvid VARCHAR(50) NOT NULL COMMENT 'BV号',
+    title VARCHAR(200) NOT NULL COMMENT '视频标题',
+    description TEXT COMMENT '视频描述',
+    thumbnail_url VARCHAR(300) COMMENT '缩略图',
+    category ENUM('maps','vehicles','weakspots') COMMENT '分类',
+    view_count INT DEFAULT 0 COMMENT '播放次数',
+    likes INT DEFAULT 0 COMMENT '点赞数',
+    author VARCHAR(50) COMMENT 'UP主',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);

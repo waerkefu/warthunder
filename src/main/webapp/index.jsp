@@ -534,7 +534,7 @@
         <h2 style="color:#fff;">WAR THUNDER</h2>
     </div>
     <ul class="sidebar-menu">
-        <li><a href="forum.jsp" class="active">论坛</a></li>
+        <li><a href="index.jsp" class="active">论坛</a></li>
         <li><a href="tutorial.jsp">教程</a></li>
         <li><a href="https://statshark.net" target="_blank">战绩查询</a></li>
         <li><a href="https://warthunder.com/" target="_blank">官网</a></li>

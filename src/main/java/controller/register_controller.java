@@ -58,23 +58,36 @@ public class register_controller extends HttpServlet {
         String password = req.getParameter("password");   // 密码
         String email = req.getParameter("email");         // 邮箱
         
-        // 3. 创建Service实例，调用用户注册方法
+        // 3. 创建Service实例
         user_service us = new user_service();
         
+        // 4. 检查邮箱是否已被注册
+        try {
+            model.user_model existingUser = us.findUserByEmail(email);
+            if (existingUser != null && existingUser.getUser_id() != 0) {
+                // 邮箱已被注册
+                req.setAttribute("error", "该邮箱已被注册");
+                req.getRequestDispatcher("register.jsp").forward(req, resp);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // 5. 调用用户注册方法
         // insertuser方法会向数据库插入新用户记录
         // 返回值：成功插入的记录数（通常为1）
         int i = us.insertuser(username, password, email);
 
-        // 4. 根据插入结果决定页面跳转
+        // 6. 根据插入结果决定页面跳转
         if(i > 0) {
             // 注册成功
             // 转发到登录页面，让用户登录
             req.getRequestDispatcher("Login.jsp").forward(req, resp);
         } else {
             // 注册失败
-            // 输出错误信息到控制台
-            // 在实际应用中，应该向用户显示友好的错误提示
-            System.out.println("注册失败！！！");
+            req.setAttribute("error", "注册失败，请重试");
+            req.getRequestDispatcher("register.jsp").forward(req, resp);
         }
     }
     

@@ -146,6 +146,16 @@
 
     <h1 class="title">登录</h1>
 
+    <%-- 显示错误信息 --%>
+    <%
+        String error = (String) request.getAttribute("error");
+        if (error != null) {
+    %>
+    <div style="background: #d9232e; color: #fff; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 16px;">
+        <%= error %>
+    </div>
+    <% } %>
+
     <form action="Login" method="post">
         <div class="form-group">
             <input type="email" class="form-control" name="email" placeholder="邮箱地址" required>
@@ -159,7 +169,7 @@
         </p>
 
         <button type="submit" class="btn btn-login">登录</button>
-        <button type="button" class="btn btn-forgot" onclick="location.href='forgot-password.jsp'">找回密码</button>
+        <button type="button" class="btn btn-forgot" onclick="alert('请联系管理员电话：15147002984')">找回密码</button>
         <!-- 新增注册按钮 -->
         <button type="button" class="btn btn-register" onclick="location.href='register.jsp'">注册账号</button>
     </form>

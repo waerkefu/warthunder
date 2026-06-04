@@ -64,6 +64,14 @@ public class user_service {
     }
     
     /**
+     * 根据邮箱查询用户
+     */
+    public user_model findUserByEmail(String email) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findUserByEmail(email);
+    }
+    
+    /**
      * 用户注册
      * 
      * 【功能说明】

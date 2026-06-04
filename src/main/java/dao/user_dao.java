@@ -96,6 +96,28 @@ public class user_dao {
     }
     
     /**
+     * findUserByEmail - 根据邮箱查询用户
+     */
+    public user_model findUserByEmail(String email) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM user WHERE email = ?";
+        ResultSet rs = db.executeQuery(sql, email);
+        
+        user_model user = new user_model();
+        if (rs.next()) {
+            user.setUser_id(rs.getInt("id"));
+            user.setUser_name(rs.getString("username"));
+            user.setUser_password(rs.getString("password"));
+            user.setEmail(rs.getString("email"));
+            user.setRole(rs.getInt("role"));
+            user.setAvatar(rs.getString("avatar"));
+        }
+        
+        db.close();
+        return user;
+    }
+    
+    /**
      * insertuser - 用户注册
      * 
      * 【功能说明】
@@ -557,6 +579,7 @@ public class user_dao {
             user_model user = new user_model();
             user.setUser_id(rs.getInt("id"));
             user.setUser_name(rs.getString("username"));
+            user.setUser_password(rs.getString("password"));
             user.setEmail(rs.getString("email"));
             user.setRole(rs.getInt("role"));
             user.setAvatar(rs.getString("avatar"));
@@ -585,6 +608,7 @@ public class user_dao {
             user_model user = new user_model();
             user.setUser_id(rs.getInt("id"));
             user.setUser_name(rs.getString("username"));
+            user.setUser_password(rs.getString("password"));
             user.setEmail(rs.getString("email"));
             user.setRole(rs.getInt("role"));
             user.setAvatar(rs.getString("avatar"));

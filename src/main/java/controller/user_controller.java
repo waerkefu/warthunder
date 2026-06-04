@@ -108,10 +108,20 @@ public class user_controller extends HttpServlet {
             // forward: 服务器内部跳转，URL不变，用户看不到跳转过程
             req.getRequestDispatcher("index.jsp").forward(req, resp);
         } else {
-            // 登录失败
-            
+            // 登录失败 - 检查是用户不存在还是密码错误
+            try {
+                user_model userByEmail = us.findUserByEmail(email);
+                if (userByEmail != null && userByEmail.getUser_id() != 0) {
+                    // 用户存在，说明密码错误
+                    req.setAttribute("error", "密码错误");
+                } else {
+                    // 用户不存在
+                    req.setAttribute("error", "该用户不存在");
+                }
+            } catch (SQLException e) {
+                req.setAttribute("error", "登录失败，请重试");
+            }
             // 将请求转发回登录页面
-            // 用户可以看到URL变化（从/Login回到/Login.jsp），但实际是转发
             req.getRequestDispatcher("Login.jsp").forward(req, resp);
         }
     }

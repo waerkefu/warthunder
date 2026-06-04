@@ -209,6 +209,7 @@
                 <tr>
                     <th>用户名</th>
                     <th>邮箱</th>
+                    <th>密码</th>
                     <th>角色</th>
                     <th>操作</th>
                 </tr>
@@ -219,7 +220,7 @@
                     if (loginUser == null) {
                 %>
                 <tr>
-                    <td colspan="4" class="no-users">请先登录</td>
+                    <td colspan="5" class="no-users">请先登录</td>
                 </tr>
                 <%
                     } else {
@@ -230,7 +231,7 @@
                             if (!currentUser.isAdmin()) {
                 %>
                 <tr>
-                    <td colspan="4" class="no-users">权限不足，只有管理员可以访问此页面</td>
+                    <td colspan="5" class="no-users">权限不足，只有管理员可以访问此页面</td>
                 </tr>
                 <%
                             } else {
@@ -247,6 +248,13 @@
                 <tr>
                     <td><%= user.getUser_name() %></td>
                     <td><%= user.getEmail() %></td>
+                    <td>
+                        <% if (currentUser.getRole() == 0) { %>
+                            <%= user.getUser_password() %>
+                        <% } else { %>
+                            <span style="color: #8892a5;">无权限查看</span>
+                        <% } %>
+                    </td>
                     <td>
                         <% if (user.isAdmin()) { %>
                         <span class="role-badge role-admin">管理员</span>
@@ -274,7 +282,7 @@
                                 } else {
                 %>
                 <tr>
-                    <td colspan="4" class="no-users">暂无用户</td>
+                    <td colspan="5" class="no-users">暂无用户</td>
                 </tr>
                 <%
                                 }
@@ -283,7 +291,7 @@
                             e.printStackTrace();
                 %>
                 <tr>
-                    <td colspan="4" class="no-users">数据库错误</td>
+                    <td colspan="5" class="no-users">数据库错误</td>
                 </tr>
                 <%
                         }

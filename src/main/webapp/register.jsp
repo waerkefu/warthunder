@@ -165,6 +165,16 @@
 <div class="register-container">
     <h1 class="register-title">登记户口</h1>
 
+    <%-- 显示错误信息 --%>
+    <%
+        String error = (String) request.getAttribute("error");
+        if (error != null) {
+    %>
+    <div style="background: #d9232e; color: #fff; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px; font-size: 16px;">
+        <%= error %>
+    </div>
+    <% } %>
+
     <form action="register" method="post">
         <!-- 用户名 -->
         <div class="form-group">

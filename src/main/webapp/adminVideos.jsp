@@ -199,6 +199,8 @@
             padding: 32px;
             width: 90%;
             max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -321,7 +323,8 @@
             <h1>🎬 视频教程管理</h1>
             <div>
                 <button class="btn-add" onclick="openModal()">添加视频</button>
-                <button class="btn-back" onclick="location.href='index.jsp'">返回首页</button>
+                <button class="btn-back" onclick="history.back()">返回</button>
+                <button class="btn-back" onclick="location.href='tutorial.jsp'">返回教程</button>
             </div>
         </div>
 
@@ -393,8 +396,8 @@
                 <h2 id="modalTitle">添加视频</h2>
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
-            <form action="video" method="post" id="videoForm" enctype="multipart/form-data">
-                <input type="hidden" name="action" id="formAction" value="add">
+            <form action="admin" method="post" id="videoForm" enctype="multipart/form-data">
+                <input type="hidden" name="action" id="formAction" value="addVideo">
                 <input type="hidden" name="id" id="videoId">
                 <input type="hidden" name="keepThumbnail" id="keepThumbnail" value="true">
 
@@ -454,7 +457,7 @@
     <script>
         function openModal() {
             document.getElementById('modalTitle').textContent = '添加视频';
-            document.getElementById('formAction').value = 'add';
+            document.getElementById('formAction').value = 'addVideo';
             document.getElementById('videoForm').reset();
             document.getElementById('videoId').value = '';
             document.getElementById('keepThumbnail').value = 'true';
@@ -470,7 +473,7 @@
 
         function editVideo(id, bvid, title, description, thumbnailUrl, category, author) {
             document.getElementById('modalTitle').textContent = '编辑视频';
-            document.getElementById('formAction').value = 'update';
+            document.getElementById('formAction').value = 'editVideo';
             document.getElementById('videoId').value = id;
             document.getElementById('bvid').value = bvid;
             document.getElementById('title').value = title;
@@ -497,6 +500,7 @@
         function previewThumbnail(input) {
             var preview = document.getElementById('thumbnailPreview');
             var img = document.getElementById('previewImg');
+            var existingThumbnail = document.getElementById('existingThumbnail');
             
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
@@ -504,6 +508,10 @@
                 reader.onload = function(e) {
                     img.src = e.target.result;
                     preview.style.display = 'block';
+                    // 隐藏现有缩略图，因为用户选择了新图片
+                    existingThumbnail.style.display = 'none';
+                    // 设置不保留原缩略图
+                    document.getElementById('keepThumbnail').value = 'false';
                 }
                 
                 reader.readAsDataURL(input.files[0]);
@@ -517,7 +525,7 @@
 
         function confirmDelete(id) {
             if (confirm('确定要删除这个视频吗？此操作不可恢复！')) {
-                window.location.href = 'video?action=delete&id=' + id;
+                window.location.href = 'admin?action=deleteVideo&id=' + id;
             }
         }
 

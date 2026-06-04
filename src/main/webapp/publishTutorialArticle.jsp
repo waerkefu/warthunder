@@ -209,7 +209,7 @@
         </div>
 
         <div class="form-card">
-            <form action="tutorialArticle" method="post" enctype="multipart/form-data">
+            <form action="publishTutorialArticle" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add">
 
                 <div class="form-group">

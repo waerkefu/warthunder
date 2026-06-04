@@ -254,7 +254,7 @@
         </div>
 
         <div class="form-card">
-            <form action="tutorialArticle" method="post" enctype="multipart/form-data">
+            <form action="publishTutorialArticle" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id" value="<%= article.getId() %>">
 
@@ -282,6 +282,7 @@
                     <div class="image-upload-area">
                         <div class="image-upload-box">
                             <input type="file" name="image1" accept="image/*" onchange="previewImage(this, 1)">
+                            <input type="hidden" name="deleteImage1" id="deleteImage1" value="false">
                             <% if (article.getImage1() != null) { %>
                             <img id="preview1" src="<%= article.getImage1() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(1)">×</button>
@@ -295,6 +296,7 @@
                         </div>
                         <div class="image-upload-box">
                             <input type="file" name="image2" accept="image/*" onchange="previewImage(this, 2)">
+                            <input type="hidden" name="deleteImage2" id="deleteImage2" value="false">
                             <% if (article.getImage2() != null) { %>
                             <img id="preview2" src="<%= article.getImage2() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(2)">×</button>
@@ -308,6 +310,7 @@
                         </div>
                         <div class="image-upload-box">
                             <input type="file" name="image3" accept="image/*" onchange="previewImage(this, 3)">
+                            <input type="hidden" name="deleteImage3" id="deleteImage3" value="false">
                             <% if (article.getImage3() != null) { %>
                             <img id="preview3" src="<%= article.getImage3() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(3)">×</button>
@@ -321,6 +324,7 @@
                         </div>
                         <div class="image-upload-box">
                             <input type="file" name="image4" accept="image/*" onchange="previewImage(this, 4)">
+                            <input type="hidden" name="deleteImage4" id="deleteImage4" value="false">
                             <% if (article.getImage4() != null) { %>
                             <img id="preview4" src="<%= article.getImage4() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(4)">×</button>
@@ -334,6 +338,7 @@
                         </div>
                         <div class="image-upload-box">
                             <input type="file" name="image5" accept="image/*" onchange="previewImage(this, 5)">
+                            <input type="hidden" name="deleteImage5" id="deleteImage5" value="false">
                             <% if (article.getImage5() != null) { %>
                             <img id="preview5" src="<%= article.getImage5() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(5)">×</button>
@@ -347,6 +352,7 @@
                         </div>
                         <div class="image-upload-box">
                             <input type="file" name="image6" accept="image/*" onchange="previewImage(this, 6)">
+                            <input type="hidden" name="deleteImage6" id="deleteImage6" value="false">
                             <% if (article.getImage6() != null) { %>
                             <img id="preview6" src="<%= article.getImage6() %>">
                             <button type="button" class="delete-btn" onclick="clearImage(6)">×</button>
@@ -397,6 +403,8 @@
             }
             var input = document.querySelector('input[name="image' + index + '"]');
             input.value = '';
+            // 设置删除标记
+            document.getElementById('deleteImage' + index).value = 'true';
         }
     </script>
 </body>

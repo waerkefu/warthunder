@@ -200,7 +200,8 @@
                 <input type="text" class="search-input" name="keyword" placeholder="搜索用户名或邮箱..." value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>">
                 <button type="submit" class="btn-search">搜索</button>
             </form>
-            <a href="adminUsers.jsp" class="btn-back">返回首页</a>
+            <button class="btn-back" onclick="location.href='admin'">返回仪表盘</button>
+            <button class="btn-back" onclick="location.href='index.jsp'">返回首页</button>
         </div>
 
         <table class="user-table">

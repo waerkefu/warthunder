@@ -570,6 +570,7 @@
             <span style="color: #00e0d0; margin-right: 12px;">欢迎, <%= loginUser %></span>
             <button class="btn-publish" onclick="togglePublishForm()">发布帖子</button>
             <% if (isAdmin) { %>
+            <a href="admin" class="btn-publish" style="background-color: #4a9eff;">仪表盘</a>
             <a href="adminUsers.jsp" class="btn-publish" style="background-color: #d9232e;">用户管理</a>
             <% } %>
             <button class="btn-logout" onclick="location.href='Login.jsp'">退出登录</button>
@@ -680,9 +681,9 @@
                     <div class="admin-menu" id="menu-<%= post.getId() %>">
                         <% if (isAdmin) { %>
                             <% if (isBanned) { %>
-                            <a href="javascript:void(0);" onclick="confirmAction('确定要解封这篇帖子吗？', 'admin?action=unban&postId=<%= post.getId() %>')">解封</a>
+                            <a href="javascript:void(0);" onclick="adminAction('确定要解封这篇帖子吗？', 'admin?action=unban&postId=<%= post.getId() %>', <%= post.getId() %>, true)">解封</a>
                             <% } else { %>
-                            <a href="javascript:void(0);" onclick="confirmAction('确定要封禁这篇帖子吗？封禁后普通用户将无法看到', 'admin?action=ban&postId=<%= post.getId() %>')">封禁</a>
+                            <a href="javascript:void(0);" onclick="adminAction('确定要封禁这篇帖子吗？封禁后普通用户将无法看到', 'admin?action=ban&postId=<%= post.getId() %>', <%= post.getId() %>, false)">封禁</a>
                             <% } %>
                         <% } %>
                         <a href="javascript:void(0);" onclick="confirmAction('确定要删除这篇帖子吗？此操作不可恢复', 'deletePost?articleId=<%= post.getId() %>')">删除</a>
@@ -746,6 +747,42 @@
     function confirmAction(message, url) {
         if (confirm(message)) {
             location.href = url;
+        }
+    }
+
+    function adminAction(message, url, postId, isBanned) {
+        if (confirm(message)) {
+            fetch(url)
+                .then(response => response.json ? response.json() : response.text())
+                .then(data => {
+                    alert(isBanned ? '帖子已解封！' : '帖子已封禁！');
+                    // 更新UI，不刷新页面
+                    const menu = document.getElementById('menu-' + postId);
+                    const postTitle = document.querySelector(`a[href="postDetail?articleId=${postId}"]`);
+                    if (isBanned) {
+                        // 解封：切换到封禁链接
+                        menu.innerHTML = `
+                            <a href="javascript:void(0);" onclick="adminAction('确定要封禁这篇帖子吗？封禁后普通用户将无法看到', 'admin?action=ban&postId=${postId}', ${postId}, false)">封禁</a>
+                            <a href="javascript:void(0);" onclick="confirmAction('确定要删除这篇帖子吗？此操作不可恢复', 'deletePost?articleId=${postId}')">删除</a>
+                        `;
+                        if (postTitle) {
+                            postTitle.innerHTML = postTitle.textContent.replace('[已封禁] ', '');
+                        }
+                    } else {
+                        // 封禁：切换到解封链接
+                        menu.innerHTML = `
+                            <a href="javascript:void(0);" onclick="adminAction('确定要解封这篇帖子吗？', 'admin?action=unban&postId=${postId}', ${postId}, true)">解封</a>
+                            <a href="javascript:void(0);" onclick="confirmAction('确定要删除这篇帖子吗？此操作不可恢复', 'deletePost?articleId=${postId}')">删除</a>
+                        `;
+                        if (postTitle) {
+                            postTitle.innerHTML = '[已封禁] ' + postTitle.textContent;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('操作失败，请重试');
+                });
         }
     }
 

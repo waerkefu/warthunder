@@ -339,7 +339,7 @@
 
         function confirmDelete(id) {
             if (confirm('确定要删除这篇文章吗？此操作不可恢复！')) {
-                window.location.href = 'tutorialArticle?action=delete&id=' + id;
+                window.location.href = 'publishTutorialArticle?action=delete&id=' + id;
             }
         }
     </script>

@@ -265,7 +265,7 @@
 
             <div class="post-list">
                 <%
-                    ArrayList<PostModel> posts = (ArrayList<PostModel>) request.getAttribute("posts");
+                    ArrayList<PostModel> posts = (ArrayList<PostModel>) request.getAttribute("results");
                     if (posts != null && !posts.isEmpty()) {
                         for (PostModel post : posts) {
                 %>

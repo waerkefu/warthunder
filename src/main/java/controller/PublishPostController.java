@@ -119,17 +119,26 @@ public class PublishPostController extends HttpServlet {
             user_service us = new user_service();
             user_model user = us.findUserByUsername(loginUser);
             
-            // 10. 保存帖子
+            // 10. 根据用户角色设置审核状态
+            // 普通用户(role=2)发布的帖子需要审核，管理员(role=0)和小管理(role=1)发布的帖子直接通过
+            int reviewStatus = user.isNormalUser() ? 0 : 1;
+            
+            // 11. 保存帖子
             int result = us.insertPostWithImages(
                 user.getUser_id(),      // 用户ID
                 title.trim(),          // 标题
                 content.trim(),        // 内容
-                image1, image2, image3, image4, image5, image6  // 图片
+                image1, image2, image3, image4, image5, image6,  // 图片
+                reviewStatus           // 审核状态
             );
             
-            // 11. 返回结果
+            // 12. 返回结果
             if (result > 0) {
-                out.println("<script>alert('帖子发布成功！');location.href='index.jsp';</script>");
+                if (user.isNormalUser()) {
+                    out.println("<script>alert('文章已提交，等待审核！');location.href='index.jsp';</script>");
+                } else {
+                    out.println("<script>alert('帖子发布成功！');location.href='index.jsp';</script>");
+                }
             } else {
                 out.println("<script>alert('帖子发布失败！');history.back();</script>");
             }

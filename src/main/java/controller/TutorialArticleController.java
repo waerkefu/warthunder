@@ -173,11 +173,18 @@ public class TutorialArticleController extends HttpServlet {
             article.setImage5(image5);
             article.setImage6(image6);
             
-            // 11. 保存文章
+            // 11. 根据用户角色设置审核状态
+            // 普通用户(role=2)发布的文章需要审核，管理员(role=0)和小管理(role=1)发布的文章直接通过
+            if (!"update".equals(action)) {
+                article.setReviewStatus(user.isNormalUser() ? 0 : 1);
+            }
+            
+            // 12. 保存文章
             int result;
             if ("update".equals(action)) {
                 // 编辑文章
                 article.setId(existingArticle.getId());
+                article.setReviewStatus(existingArticle.getReviewStatus());
                 result = us.updateTutorialArticle(article);
             } else {
                 // 添加文章
@@ -189,7 +196,11 @@ public class TutorialArticleController extends HttpServlet {
                 if ("update".equals(action)) {
                     out.println("<script>alert('文章更新成功！');location.href='tutorial.jsp';</script>");
                 } else {
-                    out.println("<script>alert('文章发布成功！');location.href='tutorial.jsp';</script>");
+                    if (user.isNormalUser()) {
+                        out.println("<script>alert('文章已提交，等待审核！');location.href='tutorial.jsp';</script>");
+                    } else {
+                        out.println("<script>alert('文章发布成功！');location.href='tutorial.jsp';</script>");
+                    }
                 }
             } else {
                 if ("update".equals(action)) {

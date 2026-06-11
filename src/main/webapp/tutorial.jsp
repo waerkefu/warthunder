@@ -500,6 +500,7 @@
                     if (loginUser != null && !loginUser.isEmpty()) {
                 %>
                 <span class="login-user">欢迎, <%= loginUser %></span>
+                <button style="padding:8px 16px;background:#fb7299;color:#fff;border:none;border-radius:4px;text-decoration:none;font-size:14px;cursor:pointer;" onclick="location.href='publishVideo'">发布视频</button>
                 <% if (isAdminOrMod) { %>
                 <button class="btn-secondary" onclick="location.href='adminVideos.jsp'">管理视频</button>
                 <% } %>
@@ -581,7 +582,6 @@
                 <div class="video-section">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
                         <h2 class="section-title">🎬 视频教程</h2>
-                        <a href="adminVideos.jsp" style="padding:8px 16px;background:#fb7299;color:#fff;border-radius:4px;text-decoration:none;font-size:14px;">发布视频</a>
                     </div>
                     <div class="video-grid">
                         <% for (VideoModel video : allVideos) { %>

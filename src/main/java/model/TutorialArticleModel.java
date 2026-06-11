@@ -15,6 +15,8 @@ public class TutorialArticleModel {
     private String image6;
     private int viewCount;
     private int status;
+    private int reviewStatus;
+    private String reviewMessage;
     private String createTime;
 
     public TutorialArticleModel() {
@@ -130,6 +132,43 @@ public class TutorialArticleModel {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public int getReviewStatus() {
+        return reviewStatus;
+    }
+
+    public void setReviewStatus(int reviewStatus) {
+        this.reviewStatus = reviewStatus;
+    }
+
+    public String getReviewMessage() {
+        return reviewMessage;
+    }
+
+    public void setReviewMessage(String reviewMessage) {
+        this.reviewMessage = reviewMessage;
+    }
+
+    public boolean isPendingReview() {
+        return reviewStatus == 0;
+    }
+
+    public boolean isReviewPassed() {
+        return reviewStatus == 1;
+    }
+
+    public boolean isReviewRejected() {
+        return reviewStatus == 2;
+    }
+
+    public String getReviewStatusText() {
+        switch (reviewStatus) {
+            case 0: return "待审核";
+            case 1: return "审核通过";
+            case 2: return "审核不通过";
+            default: return "未知";
+        }
     }
 
     public String getCreateTime() {

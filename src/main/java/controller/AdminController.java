@@ -450,9 +450,18 @@ public class AdminController extends HttpServlet {
         video.setThumbnailUrl(thumbnailUrl);
         video.setAuthor(author);
         
+        // 根据用户角色设置审核状态
+        // 管理员(role=0)发布的视频直接通过审核，小管理(role=1)发布的视频需要管理员审核
+        user_model currentUser = us.findUserByUsername(author);
+        video.setReviewStatus(currentUser.isAdmin() ? 1 : 0);
+        
         int result = us.addVideo(video);
         if (result > 0) {
-            out.println("<script>alert('视频添加成功！');location.href='admin?action=listVideos';</script>");
+            if (currentUser.isAdmin()) {
+                out.println("<script>alert('视频添加成功！');location.href='admin?action=listVideos';</script>");
+            } else {
+                out.println("<script>alert('视频已提交，等待管理员审核！');location.href='admin?action=listVideos';</script>");
+            }
         } else {
             out.println("<script>alert('视频添加失败！');history.back();</script>");
         }

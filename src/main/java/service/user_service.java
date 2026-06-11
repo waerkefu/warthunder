@@ -151,6 +151,17 @@ public class user_service {
     }
     
     /**
+     * 发布帖子（带图片和审核状态）
+     */
+    public int insertPostWithImages(int userId, String title, String content, 
+                                     String image1, String image2, String image3,
+                                     String image4, String image5, String image6,
+                                     int reviewStatus) {
+        user_dao userdao = new user_dao();
+        return userdao.insertPostWithImages(userId, title, content, image1, image2, image3, image4, image5, image6, reviewStatus);
+    }
+    
+    /**
      * 更新帖子（无图片）
      */
     public int updatePost(int postId, String title, String content) throws SQLException {
@@ -494,5 +505,79 @@ public class user_service {
     public int getBannedPostCount() throws SQLException {
         user_dao userdao = new user_dao();
         return userdao.getBannedPostCount();
+    }
+    
+    // ==================== 审核相关服务 ====================
+    
+    /**
+     * 查询待审核的帖子
+     */
+    public ArrayList<PostModel> findPendingPosts() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findPendingPosts();
+    }
+    
+    /**
+     * 查询待审核的教程文章
+     */
+    public ArrayList<TutorialArticleModel> findPendingTutorialArticles() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findPendingTutorialArticles();
+    }
+    
+    /**
+     * 查询待审核的视频
+     */
+    public ArrayList<VideoModel> findPendingVideos() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.findPendingVideos();
+    }
+    
+    /**
+     * 审核帖子
+     */
+    public int reviewPost(int postId, int status, String message) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.reviewPost(postId, status, message);
+    }
+    
+    /**
+     * 审核教程文章
+     */
+    public int reviewTutorialArticle(int articleId, int status, String message) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.reviewTutorialArticle(articleId, status, message);
+    }
+    
+    /**
+     * 审核视频
+     */
+    public int reviewVideo(int videoId, int status, String message) throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.reviewVideo(videoId, status, message);
+    }
+    
+    /**
+     * 获取待审核帖子数量
+     */
+    public int getPendingPostCount() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getPendingPostCount();
+    }
+    
+    /**
+     * 获取待审核教程文章数量
+     */
+    public int getPendingArticleCount() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getPendingArticleCount();
+    }
+    
+    /**
+     * 获取待审核视频数量
+     */
+    public int getPendingVideoCount() throws SQLException {
+        user_dao userdao = new user_dao();
+        return userdao.getPendingVideoCount();
     }
 }

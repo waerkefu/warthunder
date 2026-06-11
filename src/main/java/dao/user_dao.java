@@ -234,6 +234,9 @@ public class user_dao {
             post.setUser_id(rs.getInt("user_id"));
             post.setUsername(rs.getString("username"));  // 来自关联的user表
             post.setCreate_time(rs.getString("create_time"));
+            post.setStatus(rs.getInt("status"));
+            post.setReviewStatus(rs.getInt("review_status"));
+            post.setReviewMessage(rs.getString("review_message"));
             list.add(post);  // 将对象添加到列表
         }
         db.close();
@@ -244,14 +247,15 @@ public class user_dao {
      * findAllPosts - 查询所有已发布的帖子
      * 
      * 【功能说明】
-     * 查询所有status=1的帖子（未删除的帖子），用于论坛首页展示
+     * 查询所有status=1且review_status=1的帖子（未删除且审核通过的帖子），用于论坛首页展示
      */
     public ArrayList<PostModel> findAllPosts() throws SQLException {
         DBHelper db = new DBHelper();
         
         // status = 1 表示帖子已发布（未删除）
         // status = 0 表示帖子已删除或被屏蔽
-        String sql = "SELECT p.*, u.username FROM post p JOIN user u ON p.user_id = u.id WHERE p.status = 1 ORDER BY p.create_time DESC";
+        // review_status = 1 表示审核通过
+        String sql = "SELECT p.*, u.username FROM post p JOIN user u ON p.user_id = u.id WHERE p.status = 1 AND p.review_status = 1 ORDER BY p.create_time DESC";
         ArrayList<PostModel> list = new ArrayList<PostModel>();
         ResultSet rs = db.executeQuery(sql);
         
@@ -264,6 +268,7 @@ public class user_dao {
             post.setUsername(rs.getString("username"));
             post.setCreate_time(rs.getString("create_time"));
             post.setStatus(rs.getInt("status"));
+            post.setReviewStatus(rs.getInt("review_status"));
             post.setImage1(rs.getString("image1"));
             post.setImage2(rs.getString("image2"));
             post.setImage3(rs.getString("image3"));
@@ -353,9 +358,21 @@ public class user_dao {
     public int insertPostWithImages(int userId, String title, String content, 
                                      String image1, String image2, String image3,
                                      String image4, String image5, String image6) {
+        return insertPostWithImages(userId, title, content, image1, image2, image3, image4, image5, image6, 0);
+    }
+    
+    /**
+     * insertPostWithImages - 发布新帖子（带图片和审核状态）
+     * 
+     * @param reviewStatus 审核状态：0=待审核，1=审核通过，2=审核不通过
+     */
+    public int insertPostWithImages(int userId, String title, String content, 
+                                     String image1, String image2, String image3,
+                                     String image4, String image5, String image6,
+                                     int reviewStatus) {
         DBHelper db = new DBHelper();
-        String sql = "insert into post(title,content,user_id,image1,image2,image3,image4,image5,image6) values(?,?,?,?,?,?,?,?,?)";
-        int i = db.executeUpdate(sql, title, content, userId, image1, image2, image3, image4, image5, image6);
+        String sql = "insert into post(title,content,user_id,image1,image2,image3,image4,image5,image6,review_status) values(?,?,?,?,?,?,?,?,?,?)";
+        int i = db.executeUpdate(sql, title, content, userId, image1, image2, image3, image4, image5, image6, reviewStatus);
         db.close();
         return i;
     }
@@ -724,7 +741,7 @@ public class user_dao {
      */
     public ArrayList<VideoModel> findAllVideos() throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "SELECT * FROM tutorial_videos ORDER BY create_time DESC";
+        String sql = "SELECT * FROM tutorial_videos WHERE review_status = 1 ORDER BY create_time DESC";
         ArrayList<VideoModel> list = new ArrayList<VideoModel>();
         ResultSet rs = db.executeQuery(sql);
         while (rs.next()){
@@ -738,6 +755,7 @@ public class user_dao {
             video.setViewCount(rs.getInt("view_count"));
             video.setLikes(rs.getInt("likes"));
             video.setAuthor(rs.getString("author"));
+            video.setReviewStatus(rs.getInt("review_status"));
             video.setCreateTime(rs.getString("create_time"));
             list.add(video);
         }
@@ -750,7 +768,7 @@ public class user_dao {
      */
     public ArrayList<VideoModel> findVideosByCategory(String category) throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "SELECT * FROM tutorial_videos WHERE category = ? ORDER BY create_time DESC";
+        String sql = "SELECT * FROM tutorial_videos WHERE category = ? AND review_status = 1 ORDER BY create_time DESC";
         ArrayList<VideoModel> list = new ArrayList<VideoModel>();
         ResultSet rs = db.executeQuery(sql, category);
         while (rs.next()){
@@ -764,6 +782,7 @@ public class user_dao {
             video.setViewCount(rs.getInt("view_count"));
             video.setLikes(rs.getInt("likes"));
             video.setAuthor(rs.getString("author"));
+            video.setReviewStatus(rs.getInt("review_status"));
             video.setCreateTime(rs.getString("create_time"));
             list.add(video);
         }
@@ -801,8 +820,8 @@ public class user_dao {
      */
     public int addVideo(VideoModel video) throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "INSERT INTO tutorial_videos (bvid, title, description, thumbnail_url, category, author) VALUES (?, ?, ?, ?, ?, ?)";
-        int result = db.executeUpdate(sql, video.getBvid(), video.getTitle(), video.getDescription(), video.getThumbnailUrl(), video.getCategory(), video.getAuthor());
+        String sql = "INSERT INTO tutorial_videos (bvid, title, description, thumbnail_url, category, author, review_status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        int result = db.executeUpdate(sql, video.getBvid(), video.getTitle(), video.getDescription(), video.getThumbnailUrl(), video.getCategory(), video.getAuthor(), video.getReviewStatus());
         db.close();
         return result;
     }
@@ -853,7 +872,7 @@ public class user_dao {
      */
     public ArrayList<VideoModel> getFeaturedVideos(int limit) throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "SELECT * FROM tutorial_videos ORDER BY view_count DESC, likes DESC LIMIT ?";
+        String sql = "SELECT * FROM tutorial_videos WHERE review_status = 1 ORDER BY view_count DESC, likes DESC LIMIT ?";
         ArrayList<VideoModel> list = new ArrayList<VideoModel>();
         ResultSet rs = db.executeQuery(sql, limit);
         while (rs.next()){
@@ -867,6 +886,7 @@ public class user_dao {
             video.setViewCount(rs.getInt("view_count"));
             video.setLikes(rs.getInt("likes"));
             video.setAuthor(rs.getString("author"));
+            video.setReviewStatus(rs.getInt("review_status"));
             video.setCreateTime(rs.getString("create_time"));
             list.add(video);
         }
@@ -882,10 +902,11 @@ public class user_dao {
      * 【status字段说明】
      * status = 1: 已发布（显示给用户）
      * status = 0: 未发布或已删除（不显示）
+     * review_status = 1: 审核通过
      */
     public ArrayList<TutorialArticleModel> findAllTutorialArticles() throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "SELECT * FROM tutorial_articles WHERE status = 1 ORDER BY create_time DESC";
+        String sql = "SELECT * FROM tutorial_articles WHERE status = 1 AND review_status = 1 ORDER BY create_time DESC";
         ArrayList<TutorialArticleModel> list = new ArrayList<TutorialArticleModel>();
         ResultSet rs = db.executeQuery(sql);
         while (rs.next()) {
@@ -904,6 +925,7 @@ public class user_dao {
             article.setImage6(rs.getString("image6"));
             article.setViewCount(rs.getInt("view_count"));
             article.setStatus(rs.getInt("status"));
+            article.setReviewStatus(rs.getInt("review_status"));
             article.setCreateTime(rs.getString("create_time"));
             list.add(article);
         }
@@ -977,10 +999,11 @@ public class user_dao {
      */
     public int addTutorialArticle(TutorialArticleModel article) throws SQLException {
         DBHelper db = new DBHelper();
-        String sql = "INSERT INTO tutorial_articles (title, content, category, user_id, username, image1, image2, image3, image4, image5, image6) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tutorial_articles (title, content, category, user_id, username, image1, image2, image3, image4, image5, image6, review_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int result = db.executeUpdate(sql, article.getTitle(), article.getContent(), article.getCategory(), 
             article.getUserId(), article.getUsername(), article.getImage1(), article.getImage2(), 
-            article.getImage3(), article.getImage4(), article.getImage5(), article.getImage6());
+            article.getImage3(), article.getImage4(), article.getImage5(), article.getImage6(),
+            article.getReviewStatus());
         db.close();
         return result;
     }
@@ -1018,6 +1041,175 @@ public class user_dao {
         int result = db.executeUpdate(sql, id);
         db.close();
         return result;
+    }
+    
+    // ==================== 审核相关方法 ====================
+    
+    /**
+     * findPendingPosts - 查询待审核的帖子（普通用户发布的）
+     */
+    public ArrayList<PostModel> findPendingPosts() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT p.*, u.username FROM post p JOIN user u ON p.user_id = u.id WHERE p.review_status = 0 ORDER BY p.create_time DESC";
+        ArrayList<PostModel> list = new ArrayList<PostModel>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()){
+            PostModel post = new PostModel();
+            post.setId(rs.getInt("id"));
+            post.setTitle(rs.getString("title"));
+            post.setContent(rs.getString("content"));
+            post.setUser_id(rs.getInt("user_id"));
+            post.setUsername(rs.getString("username"));
+            post.setCreate_time(rs.getString("create_time"));
+            post.setStatus(rs.getInt("status"));
+            post.setReviewStatus(rs.getInt("review_status"));
+            post.setReviewMessage(rs.getString("review_message"));
+            post.setImage1(rs.getString("image1"));
+            post.setImage2(rs.getString("image2"));
+            post.setImage3(rs.getString("image3"));
+            list.add(post);
+        }
+        db.close();
+        return list;
+    }
+    
+    /**
+     * findPendingTutorialArticles - 查询待审核的教程文章
+     */
+    public ArrayList<TutorialArticleModel> findPendingTutorialArticles() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT * FROM tutorial_articles WHERE review_status = 0 ORDER BY create_time DESC";
+        ArrayList<TutorialArticleModel> list = new ArrayList<TutorialArticleModel>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()) {
+            TutorialArticleModel article = new TutorialArticleModel();
+            article.setId(rs.getInt("id"));
+            article.setTitle(rs.getString("title"));
+            article.setContent(rs.getString("content"));
+            article.setCategory(rs.getString("category"));
+            article.setUserId(rs.getInt("user_id"));
+            article.setUsername(rs.getString("username"));
+            article.setImage1(rs.getString("image1"));
+            article.setImage2(rs.getString("image2"));
+            article.setImage3(rs.getString("image3"));
+            article.setViewCount(rs.getInt("view_count"));
+            article.setStatus(rs.getInt("status"));
+            article.setReviewStatus(rs.getInt("review_status"));
+            article.setReviewMessage(rs.getString("review_message"));
+            article.setCreateTime(rs.getString("create_time"));
+            list.add(article);
+        }
+        db.close();
+        return list;
+    }
+    
+    /**
+     * findPendingVideos - 查询待审核的视频（小管理发布的）
+     */
+    public ArrayList<VideoModel> findPendingVideos() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT v.* FROM tutorial_videos v WHERE v.review_status = 0 ORDER BY v.create_time DESC";
+        ArrayList<VideoModel> list = new ArrayList<VideoModel>();
+        ResultSet rs = db.executeQuery(sql);
+        while (rs.next()){
+            VideoModel video = new VideoModel();
+            video.setId(rs.getInt("id"));
+            video.setBvid(rs.getString("bvid"));
+            video.setTitle(rs.getString("title"));
+            video.setDescription(rs.getString("description"));
+            video.setThumbnailUrl(rs.getString("thumbnail_url"));
+            video.setCategory(rs.getString("category"));
+            video.setViewCount(rs.getInt("view_count"));
+            video.setLikes(rs.getInt("likes"));
+            video.setAuthor(rs.getString("author"));
+            video.setReviewStatus(rs.getInt("review_status"));
+            video.setReviewMessage(rs.getString("review_message"));
+            video.setCreateTime(rs.getString("create_time"));
+            list.add(video);
+        }
+        db.close();
+        return list;
+    }
+    
+    /**
+     * reviewPost - 审核帖子
+     * @param postId 帖子ID
+     * @param status 审核状态：1=通过，2=不通过
+     * @param message 审核意见
+     */
+    public int reviewPost(int postId, int status, String message) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE post SET review_status = ?, review_message = ? WHERE id = ?";
+        int result = db.executeUpdate(sql, status, message, postId);
+        db.close();
+        return result;
+    }
+    
+    /**
+     * reviewTutorialArticle - 审核教程文章
+     */
+    public int reviewTutorialArticle(int articleId, int status, String message) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_articles SET review_status = ?, review_message = ? WHERE id = ?";
+        int result = db.executeUpdate(sql, status, message, articleId);
+        db.close();
+        return result;
+    }
+    
+    /**
+     * reviewVideo - 审核视频
+     */
+    public int reviewVideo(int videoId, int status, String message) throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "UPDATE tutorial_videos SET review_status = ?, review_message = ? WHERE id = ?";
+        int result = db.executeUpdate(sql, status, message, videoId);
+        db.close();
+        return result;
+    }
+    
+    /**
+     * getPendingPostCount - 获取待审核帖子数量
+     */
+    public int getPendingPostCount() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT COUNT(*) as count FROM post WHERE review_status = 0";
+        ResultSet rs = db.executeQuery(sql);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt("count");
+        }
+        db.close();
+        return count;
+    }
+    
+    /**
+     * getPendingArticleCount - 获取待审核教程文章数量
+     */
+    public int getPendingArticleCount() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT COUNT(*) as count FROM tutorial_articles WHERE review_status = 0";
+        ResultSet rs = db.executeQuery(sql);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt("count");
+        }
+        db.close();
+        return count;
+    }
+    
+    /**
+     * getPendingVideoCount - 获取待审核视频数量
+     */
+    public int getPendingVideoCount() throws SQLException {
+        DBHelper db = new DBHelper();
+        String sql = "SELECT COUNT(*) as count FROM tutorial_videos WHERE review_status = 0";
+        ResultSet rs = db.executeQuery(sql);
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt("count");
+        }
+        db.close();
+        return count;
     }
     
     // ==================== 获取分类内容数量 ====================

@@ -352,6 +352,9 @@
             <li class="menu-item"><a href="profile?action=edit">✏️ 编辑资料</a></li>
             <li class="menu-item"><a href="profile?action=changePassword">🔒 修改密码</a></li>
             <li class="menu-item"><a href="index.jsp">📝 发布帖子</a></li>
+            <% if (user != null && (user.isAdmin() || user.isModerator())) { %>
+            <li class="menu-item"><a href="review">✅ 内容审核</a></li>
+            <% } %>
         </ul>
     </aside>
 
@@ -364,10 +367,22 @@
                     for (PostModel post : posts) {
             %>
             <div class="post-card">
-                <a href="postDetail?articleId=<%= post.getId() %>" class="post-title"><%= post.getTitle() %></a>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <a href="postDetail?articleId=<%= post.getId() %>" class="post-title"><%= post.getTitle() %></a>
+                    <% if (post.getReviewStatus() == 0) { %>
+                    <span style="background-color: #ff9800; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">待审核</span>
+                    <% } else if (post.getReviewStatus() == 2) { %>
+                    <span style="background-color: #d9232e; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">不通过</span>
+                    <% } else { %>
+                    <span style="background-color: #4caf50; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">已通过</span>
+                    <% } %>
+                </div>
                 <div class="post-content"><%= post.getContent() %></div>
                 <div class="post-meta">
                     <span>发布于: <%= post.getCreate_time() %></span>
+                    <% if (post.getReviewStatus() == 2 && post.getReviewMessage() != null && !post.getReviewMessage().isEmpty()) { %>
+                    <span style="display: block; color: #d9232e; margin-top: 4px;">驳回原因: <%= post.getReviewMessage() %></span>
+                    <% } %>
                 </div>
                 <div class="post-actions">
                     <button class="btn btn-edit" onclick="editPost(<%= post.getId() %>)">编辑</button>
